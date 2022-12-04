@@ -1,0 +1,306 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
+# Start
+```{r}
+library(ISLR2)
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Cmd+Shift+K* to preview the HTML file). 
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+
+```{r}
+names(Smarket)
+```
+```{r}
+dim(Smarket)
+```
+# Summary Statistics
+```{r}
+summary(Smarket)
+```
+# Scatter Plots
+```{r}
+pairs(Smarket)
+```
+## Checking Correlation
+```{r}
+cor(Smarket)
+```
+```{r}
+cor(Smarket[,-9])
+```
+```{r}
+attach(Smarket)
+plot(Volume)
+```
+# Logistic Regression
+## Creating logistic regression model
+```{r}
+# glm - generalized linear model.  When family = binomial we're performing logistic regression
+glm.fits <- glm(
+  Direction ~ Lag1 + Lag2 + Lag3 + Lag4 + Lag5 + Volume,
+  data = Smarket,
+  family = binomial
+)
+
+summary(glm.fits)
+```
+```{r}
+coef(glm.fits)
+```
+```{r}
+summary(glm.fits)$coef
+```
+```{r}
+summary(glm.fits)$coef[, 4]
+```
+### Predictions
+```{r}
+glm.probs <- predict(glm.fits, type='response')
+glm.probs[1:10]
+```
+
+
+The probabilities above correspond to the stock market going up b/c the dummy variable Direction has a value of 1 for going up.
+```{r}
+contrasts(Direction)
+```
+```{r}
+glm.pred <- rep("Down", dim(Smarket)[1])
+glm.pred[glm.probs>0.5] = "Up"
+```
+
+### Confusion Marix
+```{r}
+table(glm.pred, Direction)
+```
+## Retraining the model using training/testing split
+
+### Splitting 2005 data from the rest
+```{r}
+train <- (Year < 2005)
+Smarket.2005 <- Smarket[!train, ]
+dim(Smarket.2005)
+
+Direction.2005 <- Direction[!train]
+```
+### training model
+```{r}
+glm.fits <- glm(
+  Direction ~ Lag1 + Lag2 + Lag3 + Lag4 + Lag5 + Volume,
+  data = Smarket,
+  family = binomial,
+  subset = train
+)
+
+```
+
+### Predicted probabilities
+```{r}
+glm.probs <- predict(object = glm.fits, 
+                     newdata = Smarket.2005, 
+                     type="response")
+```
+
+```{r}
+glm.pred <- rep(x = "Down",
+                times = 252)
+glm.pred[glm.probs>0.5] <- "Up"
+```
+
+```{r}
+table(glm.pred, Direction.2005)
+```
+```{r}
+# Test set correct predictions
+mean(glm.pred == Direction.2005)
+
+# Test set error rate
+mean(glm.pred != Direction.2005)
+```
+
+## Reftting model with just `Lag1` and `Lag2`
+```{r}
+glm.fits <- glm(
+  Direction ~ Lag1 + Lag2,
+  data=Smarket,
+  family=binomial,
+  subset=train
+)
+
+glm.probs <- predict(object = glm.fits,
+                     newdata = Smarket.2005,
+                     type='response')
+
+glm.preds <- rep(x="Down", times=length(glm.probs))
+glm.preds[glm.probs>0.5] <-"Up"
+
+table(glm.preds, Direction.2005)
+
+mean(glm.preds == Direction.2005)
+```
+
+```{r}
+predict(object=glm.fits,
+        newdata = 
+          data.frame(Lag1 = c(1.2, 1.5),
+                     Lag2 = c(1.1, -0.8)),
+        type="response"
+        )
+```
+
+# Linear Discriminant Analysis (LDA)
+```{r}
+library(MASS)
+```
+```{r}
+lda.fit <- lda(
+  Direction ~ Lag1 + Lag2,
+  data = Smarket,
+  subset = train
+)
+
+lda.fit
+```
+```{r}
+plot(lda.fit)
+```
+
+```{r}
+lda.pred <- predict(object=lda.fit,
+                    newdata=Smarket.2005)
+names(lda.pred)
+```
+```{r}
+lda.pred$class[1:10]
+lda.pred$posterior[1:10]
+lda.pred$x[1:10]
+```
+```{r}
+lda.class <- lda.pred$class
+table(lda.class, Direction.2005)
+
+mean(lda.class == Direction.2005)
+```
+```{r}
+sum(lda.pred$posterior[, 1] >= 0.5)
+sum(lda.pred$posterior[, 1] < 0.5)
+```
+```{r}
+lda.pred$posterior[1:20, 1]
+lda.class[1:20]
+```
+```{r}
+sum(lda.pred$posterior[,1] > 0.9)
+```
+
+# Quadratic Discriminant Analysis (QDA)
+```{r}
+qda.fit <- qda(
+  Direction ~ Lag1 + Lag2,
+  data = Smarket,
+  subset=train
+)
+
+qda.fit
+```
+
+```{r}
+qda.class <- predict(object = qda.fit,
+                     newdata = Smarket.2005)$class
+table(qda.class, Direction.2005)
+
+mean(qda.class == Direction.2005)
+```
+# Naive Bayes
+```{r}
+library(e1071)
+
+nb.fit <- naiveBayes(formula = Direction ~ Lag1 + Lag2,
+                     data = Smarket,
+                     subset = train)
+
+nb.fit
+```
+```{r}
+# Slice Lag1 using train as a boolean mask
+# Then slice the result using another boolean mask
+# This works because Lag1 and Direction start as the same length
+# and maintain the same length after each slice occurs
+mean(Lag1[train][Direction[train] == "Down"])
+
+sd(Lag1[train][Direction[train]=="Down"])
+```
+```{r}
+nb.class <- predict(object = nb.fit, 
+                    newdata = Smarket.2005)
+table(nb.class, Direction.2005)
+
+mean(nb.class == Direction.2005)
+```
+```{r}
+nb.preds <- predict(object = nb.fit,
+                    newdata = Smarket.2005,
+                    type='raw')
+nb.preds[1:5,]
+```
+# kNN - K Nearest Neighbors
+```{r}
+library(class)
+train.X <- cbind(Lag1, Lag2)[train, ]
+test.X <- cbind(Lag1, Lag2)[!train, ]
+train.Direction <- Direction[train]
+```
+
+```{r}
+set.seed(1)
+knn.pred <- knn(train = train.X,
+                test = test.X,
+                cl = train.Direction,
+                k=1)
+table(knn.pred, Direction.2005)
+```
+
+## Caravan Data Set
+```{r}
+library(ISLR2)
+dim(Caravan)
+attach(Caravan)
+
+summary(Purchase)
+
+348 / (348 + 5474)
+```
+```{r}
+# Standardize all numerical columns.  Column 86 is qualitative
+# so we exclude it
+standardized.X <- scale(Caravan[, -86])
+var(Caravan[, 1])
+var(Caravan[, 2])
+var(standardized.X[, 1])
+var(standardized.X[, 2])
+```
+```{r}
+test <- 1:1000
+train.X <- standardized.X[-test, ]
+test.X <- standardized.X[test, ]
+train.Y <- Purchase[-test]
+test.Y <- Purchase[test]
+
+set.seed(1)
+knn.pred <- knn(train = train.X,
+                test = test.X,
+                cl = train.Y,
+                k=1)
+
+```
+
