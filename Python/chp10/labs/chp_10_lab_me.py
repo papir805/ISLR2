@@ -25,12 +25,8 @@ import statsmodels.formula.api as smf
 import statsmodels.api as sm
 
 import patsy
-#from sklearn.linear_model import RidgeCV
-
-#import sklearn
 
 import tensorflow as tf
-#from tensorflow import keras
 import tensorflow.keras as keras
 from tensorflow.keras import layers
 
@@ -38,12 +34,9 @@ import matplotlib.pyplot as plt
 
 import os
 
-#from keras.preprocessing import image as image_utils
 from keras.applications.imagenet_utils import decode_predictions
 from keras.applications.imagenet_utils import preprocess_input
 
-#from scipy import sparse
-#from itertools import chain
 
 import glmnet_python
 from glmnet import glmnet; from glmnetPlot import glmnetPlot
@@ -105,32 +98,11 @@ y = np.array(Gitters['Salary'])
 x.design_info.column_names
 
 # %%
-x_scale.shape
-
-# %%
-x_scale[~test_mask].shape
-
-# %%
-y[~test_mask].shape
-
-# %% tags=[]
-x_scale.tolist()[4]
-
-# %%
 X_train = x_scale[~test_mask]
 X_test = x_scale[test_mask]
 
 y_train = Gitters[~test_mask]['Salary']
 y_test = Gitters[test_mask]['Salary']
-
-# Old code that was from before I discovered the cvglmnet module for Python that more closely mimics the cv.glmnet function from R
-
-# ridge_cv = RidgeCV(scoring='neg_mean_absolute_error').fit(X_train, y_train)
-
-# rpred = ridge_cv.predict(X_test)
-
-# np.mean(abs(y_test - rpred))
-
 
 cvfit = cvglmnet(x = x_scale[~test_mask], y = y[~test_mask], ptype='mae')
 
@@ -152,7 +124,11 @@ modnn = keras.Sequential(
 )
 
 # %%
-modnn.compile(loss=tf.keras.losses.MeanSquaredError(), optimizer='rmsprop', metrics=tf.keras.losses.MeanAbsoluteError())
+modnn.compile(
+    loss=tf.keras.losses.MeanSquaredError(), 
+    optimizer='rmsprop', 
+    metrics=tf.keras.losses.MeanAbsoluteError()
+)
 
 # %% tags=[]
 history = modnn.fit(X_train, 
@@ -164,6 +140,7 @@ history = modnn.fit(X_train,
 
 # %%
 fig, ax = plt.subplots(2, 1, sharex = True, figsize=(8,6))
+
 ax[0].plot(history.history['loss'])
 ax[0].plot(history.history['val_loss'])
 ax[0].set_title('model loss')
@@ -177,6 +154,7 @@ ax[1].set_title('model mean_abs_error')
 ax[1].set_ylabel('mean_abs_error')
 ax[1].set_xlabel('epoch')
 ax[1].legend(['Train', 'Validation'])
+
 plt.tight_layout();
 
 # %%
@@ -202,20 +180,11 @@ x_train = np.reshape(x_train, newshape=(x_train.shape[0], 784))
 x_test = np.reshape(x_test, newshape=(x_test.shape[0], 784))
 
 # %%
-x_train.shape
-
-# %%
 # y_train = pd.get_dummies(g_train)
 # y_test = pd.get_dummies(g_test)
 
 y_train = keras.utils.to_categorical(g_train, num_classes=10)
 y_test = keras.utils.to_categorical(g_test, num_classes=10)
-
-# %%
-y_train[1]
-
-# %%
-y_train.shape
 
 # %%
 x_train = x_train / 255
@@ -233,7 +202,11 @@ modelnn = keras.Sequential(
 )
 
 # %%
-modelnn.compile(loss='categorical_crossentropy', optimizer='rmsprop', metrics='accuracy')
+modelnn.compile(
+    loss='categorical_crossentropy', 
+    optimizer='rmsprop', 
+    metrics='accuracy'
+)
 
 # %% tags=[]
 history = modelnn.fit(x_train, 
@@ -262,6 +235,7 @@ ax[1].set_title('model accuracy')
 ax[1].set_ylabel('accuracy')
 ax[1].set_xlabel('epoch')
 ax[1].legend(['Train', 'Validation'])
+
 plt.tight_layout();
 
 # %%
@@ -271,12 +245,6 @@ y_pred_classes = np.argmax(y_proba, axis=1)
 # %%
 modelnn_acc = np.mean(y_pred_classes == g_test)
 modelnn_acc
-
-# %%
-y_proba[0]
-
-# %%
-y_pred_classes.shape, g_test.shape
 
 # %% [markdown]
 # ## Multiclass Logistic Regression
@@ -289,7 +257,10 @@ modellr = keras.models.Sequential(
 )
 
 # %%
-modellr.compile(loss='categorical_crossentropy', optimizer='rmsprop', metrics='accuracy')
+modellr.compile(
+    loss='categorical_crossentropy', 
+    optimizer='rmsprop', 
+    metrics='accuracy')
 
 # %%
 modellr.fit(x_train, 
@@ -359,7 +330,11 @@ model = keras.models.Sequential(
 )
 
 # %%
-model.compile(loss='categorical_crossentropy', optimizer='rmsprop', metrics='accuracy')
+model.compile(
+    loss='categorical_crossentropy', 
+    optimizer='rmsprop', 
+    metrics='accuracy'
+)
 
 history = model.fit(x_train, 
                     y_train, 
@@ -385,7 +360,7 @@ model.summary()
 # https://adamspannbauer.github.io/2018/02/14/image-classification-r-and-python/
 
 # %%
-img_dir = '/Users/rancher/Google Drive/Coding/ISLR2/Python/chp10/labs/book_images'
+img_dir = './book_images'
 
 image_names = os.listdir(img_dir)
 
@@ -519,19 +494,24 @@ model = keras.models.Sequential(
     ]
 )
 
-model.compile(loss='binary_crossentropy', optimizer='rmsprop', metrics='accuracy')
+model.compile(
+    loss='binary_crossentropy', 
+    optimizer='rmsprop', 
+    metrics='accuracy'
+)
 
 history = model.fit(x=x_train_1h.tocsr()[~ival_mask], 
                     y=y_train[~ival_mask], 
-                    epochs=20, batch_size=512, 
-                    validation_data=(
-                        x_train_1h.tocsr()[ival_mask], y_train[ival_mask]
-                    ),
-                    verbose=0
-                   )
+                    epochs=20, 
+                    batch_size=512, 
+                    validation_data=(x_train_1h.tocsr()[ival_mask], 
+                                     y_train[ival_mask]),
+                    verbose=0)
 
 # %%
 fig, ax = plt.subplots(2, 1, sharex = True, figsize=(8,6))
+
+fig.suptitle("Training/Validation Data")
 
 ax[0].plot(history.history['loss'])
 ax[0].plot(history.history['val_loss'])
@@ -552,13 +532,15 @@ plt.tight_layout();
 # %% tags=[]
 history2 = model.fit(x = x_train_1h.tocsr()[~ival_mask], 
                      y = y_train[~ival_mask], 
-                     epochs=20, batch_size=512, 
+                     epochs=20, 
+                     batch_size=512, 
                      validation_data=(x_test_1h.tocsr(), y_test),
-                     verbose=0
-                    )
+                     verbose=0)
 
 # %%
 fig, ax = plt.subplots(2, 1, sharex = True, figsize=(8,6))
+
+fig.suptitle("Training/Testing Data")
 
 ax[0].plot(history2.history['loss'])
 ax[0].plot(history2.history['val_loss'])
@@ -641,14 +623,23 @@ model = keras.models.Sequential(
 )
 
 # %%
-model.compile(optimizer = 'rmsprop', loss='binary_crossentropy', metrics='accuracy')
+model.compile(
+    optimizer = 'rmsprop', 
+    loss='binary_crossentropy', 
+    metrics='accuracy'
+)
 
 history = model.fit(x = x_train, 
                     y = y_train,
-                    epochs = 10, batch_size = 128,
+                    epochs = 10, 
+                    batch_size = 128,
                     validation_data = (x_test, y_test),
-                    verbose=0
-                   )
+                    verbose=0)
+
+# %%
+predy = model.predict(x_test) > 0.5
+
+np.mean(y_test == predy.flatten())
 
 # %%
 fig, ax = plt.subplots(2, 1, sharex = True, figsize = (8,6))
@@ -667,11 +658,7 @@ ax[1].set_ylabel('accuracy')
 ax[1].set_xlabel('epoch')
 ax[1].legend(['Train', 'Validation'])
 
-plt.tight_layout()
-
-predy = model.predict(x_test) > 0.5
-
-np.mean(y_test == predy.flatten());
+plt.tight_layout();
 
 # %% [markdown]
 # ## Time Series Prediction
@@ -722,16 +709,8 @@ arframe = pd.concat(
 )
 
 # %%
-arframe
-
-# %%
 arframe = arframe[5:]
 istrain = istrain[5:]
-
-# %%
-arframe.shape
-
-# %%
 
 # %%
 training_mask = istrain.astype(bool)
@@ -763,9 +742,6 @@ arfitd = armodeld.fit()
 
 arpredd = arfitd.predict(arframed[~training_mask])
 1 - np.mean((arpredd - arframed[~training_mask]['log_volume']) ** 2) / V_0
-
-# %%
-day_df[5:].shape, arframe.shape, arframed.shape
 
 # %%
 n = arframe.shape[0]
@@ -810,43 +786,40 @@ plt.xlabel('epoch')
 plt.legend(['Train', 'Validation']);
 
 # %%
-model = keras.models.Sequential(
-    [
-        layers.Flatten(),
-        layers.Dense(units = 1)
-    ]
-)
+# model = keras.models.Sequential(
+#     [
+#         layers.Flatten(),
+#         layers.Dense(units = 1)
+#     ]
+# )
 
-model.compile(optimizer='rmsprop', loss='mse')
+# model.compile(optimizer='rmsprop', loss='mse')
 
 # %% tags=[]
-history = model.fit(
-    x = xrnn[training_mask, :, :],
-    y = arframe[training_mask]['log_volume'],
-    batch_size = 64, epochs = 200,
-    validation_data = (xrnn[~training_mask, :, :], 
-                       arframe[~training_mask]['log_volume']),
-    verbose = 0
-)
+# history = model.fit(
+#     x = xrnn[training_mask, :, :],
+#     y = arframe[training_mask]['log_volume'],
+#     batch_size = 64, epochs = 200,
+#     validation_data = (xrnn[~training_mask, :, :], 
+#                        arframe[~training_mask]['log_volume']),
+#     verbose = 0
+# )
 
-kpred = model.predict(xrnn[~training_mask])
-1 - np.mean((kpred.flatten() - arframe[~training_mask]['log_volume'])**2) / V_0
+# kpred = model.predict(xrnn[~training_mask])
+# 1 - np.mean((kpred.flatten() - arframe[~training_mask]['log_volume'])**2) / V_0
 
 # %%
-plt.plot(history.history['loss'])
-plt.plot(history.history['val_loss'])
-plt.title('model loss')
-plt.ylabel('loss')
-plt.xlabel('epoch')
-plt.legend(['Train', 'Validation']);
+# plt.plot(history.history['loss'])
+# plt.plot(history.history['val_loss'])
+# plt.title('model loss')
+# plt.ylabel('loss')
+# plt.xlabel('epoch')
+# plt.legend(['Train', 'Validation']);
 
 # %%
 x = patsy.dmatrix(formula_like = 'day + L1_DJ_return + L1_log_volume + L1_log_volatility + L2_DJ_return + L2_log_volume + L2_log_volatility + L3_DJ_return + L3_log_volume + L3_log_volatility + L4_DJ_return + L4_log_volume + L4_log_volatility + L5_DJ_return + L5_log_volume + L5_log_volatility - 1', data = arframed)
 
 x.design_info.column_names
-
-# %%
-x.shape
 
 # %%
 arnnd = keras.models.Sequential(

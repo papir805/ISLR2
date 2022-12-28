@@ -358,7 +358,7 @@ modlr.summary()
 # Note: I didn't have many personal photographs of pets other than my own, so to add some variety I used pictures of other items that I had in my photo library.  I also wanted to throw in some edge cases and see how the model handles them.
 
 # %%
-img_dir = '/Users/rancher/Google Drive/Coding/ISLR2/Python/chp10/exercises/images'
+img_dir = './images'
 
 image_names = os.listdir(img_dir)
 
@@ -559,6 +559,14 @@ history = model.fit(
 kpred = model.predict(xrnn[~training_mask])
 r_2 = 1 - np.mean((kpred.flatten() - arframe[~training_mask]['log_volume'])**2) / V_0
 r_2
+
+# %%
+plt.plot(history.history['loss'])
+plt.plot(history.history['val_loss'])
+plt.title('model loss')
+plt.ylabel('loss')
+plt.xlabel('epoch')
+plt.legend(['Train', 'Validation']);
 
 # %% [markdown]
 # The Linear AR model from the lab using `lm()` (`statsmodelsformulas.ols` in Python) has a test $R^2$ of 0.4132, which is very close to the $R^2$ above generated from using a neural network with a Flatten() layer.  Performance between the two models is very similar.
