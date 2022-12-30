@@ -786,37 +786,6 @@ plt.xlabel('epoch')
 plt.legend(['Train', 'Validation']);
 
 # %%
-# model = keras.models.Sequential(
-#     [
-#         layers.Flatten(),
-#         layers.Dense(units = 1)
-#     ]
-# )
-
-# model.compile(optimizer='rmsprop', loss='mse')
-
-# %% tags=[]
-# history = model.fit(
-#     x = xrnn[training_mask, :, :],
-#     y = arframe[training_mask]['log_volume'],
-#     batch_size = 64, epochs = 200,
-#     validation_data = (xrnn[~training_mask, :, :], 
-#                        arframe[~training_mask]['log_volume']),
-#     verbose = 0
-# )
-
-# kpred = model.predict(xrnn[~training_mask])
-# 1 - np.mean((kpred.flatten() - arframe[~training_mask]['log_volume'])**2) / V_0
-
-# %%
-# plt.plot(history.history['loss'])
-# plt.plot(history.history['val_loss'])
-# plt.title('model loss')
-# plt.ylabel('loss')
-# plt.xlabel('epoch')
-# plt.legend(['Train', 'Validation']);
-
-# %%
 x = patsy.dmatrix(formula_like = 'day + L1_DJ_return + L1_log_volume + L1_log_volatility + L2_DJ_return + L2_log_volume + L2_log_volatility + L3_DJ_return + L3_log_volume + L3_log_volatility + L4_DJ_return + L4_log_volume + L4_log_volatility + L5_DJ_return + L5_log_volume + L5_log_volatility - 1', data = arframed)
 
 x.design_info.column_names
