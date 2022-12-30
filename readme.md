@@ -1,13 +1,13 @@
 # Porting code from ISLR 2nd Edition
 
 ## Background:
-The book [Introduction to Statistical Learning](https://www.statlearning.com) contains a wealth of information on machine learning algorithms, with labs and examples done in R using public datasets.  Each chapter contains exercises which are meant to be performed in R as well.  Many, if not all, of the labs or exercises can be done in Python though.  
+The book [Introduction to Statistical Learning](https://www.statlearning.com) contains a wealth of information on machine learning algorithms, with labs and examples done in R, using public datasets.  Each chapter contains exercises which are meant to be performed in R as well.  Many, if not all, of the labs or exercises can be done in Python though.  
 
-There are some great GitHub repositories that have already ported code from some of the labs to Python and some of these repositories also contain answers to the applied exercises in Python too, however not everything has been ported over yet.  In particular, the second edition of ISLR was recently released (August 2021), which contained several new chapters not present in the first edition.  
+There are some great GitHub repositories that have already ported code from some of the labs to Python and some of these repositories contain answers to the applied exercises in Python too, however not everything has been ported over yet.  In particular, the second edition of ISLR was recently released (August 2021), which contain several new chapters not present in the first edition.  
 <br/>
 
 ## Goal:
-This repository aims to fill the void and contains Jupyter notebooks with code that I've ported over from R to Python, which reproduce results found in the labs, or contain my own answers to the exercises, in the three chapters that weren't present in the first edition of the book:
+This repository aims to fill the void and contains Jupyter notebooks with code I've ported from R to Python from the labs in these three new chapters  These notebooks try to reproduce the results found in the labs as closely as possible.  Additionally, I've created Jupyter notebooks with Python code which contain my own answers to the exercises.
 
 * Chapter 10 - Deep Learning
 	- [Labs](https://nbviewer.org/github/papir805/ISLR2/blob/master/Python/chp10/labs/chp_10_lab_me.ipynb)
@@ -22,7 +22,7 @@ This repository aims to fill the void and contains Jupyter notebooks with code t
 <br/>
 
 ## For the future:
-As time progresses, I may also try to reproduce code from other chapters in the book and will post that code here too.
+As I work through other chapters in the book, I may also add any code that I create for those labs or exercises here too.
 
 <br/>
 
