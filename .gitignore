@@ -3,6 +3,8 @@
 **.RData
 **.Ruserdata
 **.DS_Store
+.ipynb_checkpoints
+*/.ipynb_checkpoints/*
 
 Python/chp10/labs/book_images/.RDataTmp
 
