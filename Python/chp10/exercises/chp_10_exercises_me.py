@@ -75,26 +75,14 @@ def find_local_min(b_0, p = 0.1):
     import numpy as np
     
     betas = []
-
-    keep_running = True
     
-    while keep_running:
+    derivative = np.cos(b_0) + 1/10
+    
+    while not np.abs(derivative) < 0.000001 :
+        #print(b_0, derivative)
         betas.append(b_0)
-        current_deriv = np.cos(b_0) + 1/10
-        
-        if current_deriv < 0:
-            b_0 += p
-            current_deriv = np.cos(b_0) + 1/10 
-            #print(b_0, current_deriv, keep_running)
-            if current_deriv > 0:
-                keep_running = False
-                #print(b_0, current_deriv, keep_running)
-        elif current_deriv > 0:
-            b_0 -= p
-            current_deriv = np.cos(b_0) + 1/10
-            
-            if current_deriv < 0:
-                keep_running = False       
+        b_0 -= p * derivative
+        derivative = np.cos(b_0) + 1/10      
         
     betas.append(b_0)
     return betas
