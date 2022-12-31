@@ -7,15 +7,15 @@ There are some great GitHub repositories that have already ported code from some
 <br/>
 
 ## Goal:
-This repository aims to fill the void and contains Jupyter notebooks with code I've ported from R to Python from the labs in these three new chapters  These notebooks try to reproduce the results found in the labs as closely as possible.  Additionally, I've created Jupyter notebooks with Python code which contain my own answers to the exercises.
+This repository aims to fill the void and contains Jupyter notebooks with code from the labs of these three chapters, which I've ported from R to Python.  These notebooks try to reproduce the results found in the labs as closely as possible.  Additionally, I've created Jupyter notebooks and used Python code to produce my own answers to the chapters' exercises.
 
-* Chapter 10 - Deep Learning
+* **Chapter 10 - Deep Learning**
 	- [Labs](https://nbviewer.org/github/papir805/ISLR2/blob/master/Python/chp10/labs/chp_10_lab_me.ipynb)
 	- [Applied Exercises](https://nbviewer.org/github/papir805/ISLR2/blob/master/Python/chp10/exercises/chp_10_exercises_me.ipynb)
-* Chapter 11 - Survival Analysis and Censored Data
+* **Chapter 11 - Survival Analysis and Censored Data**
 	- Labs: Coming Soon
 	- Applied Exercises: Coming Soon
-* Chapter 13 - Multiple Testing
+* **Chapter 13 - Multiple Testing**
 	- Labs: Comins Soon
 	- Applied Exercises: Coming Soon
 
