@@ -64,11 +64,30 @@ plt.ylabel(r'$R(\beta)$');
 # %% [markdown]
 # ### 6b)  
 # What is the derivative of this function?
-# $R\prime(\beta) = cos(\beta)+1/10$
+#
+# $$\nabla R(\beta) = \frac{\partial R(\beta)}{\partial \beta} = cos(\beta)+1/10$$
 
 # %% [markdown]
 # ### 6c) 
 # Given $\beta^0 = 2.3$, run gradient descent to find a local minimum of $R(\beta)$ using a learning rate of $\rho=0.1$.  Show each of $\beta^0, \beta^1,...$ in your plot, as well as the final answer.
+
+# %% [markdown]
+# Below, I define a function `find_local_min()`, using the formula from section 10.7.1 on Backpropagation from page 435, that will run the gradient descent.  The formula is as follows:  
+#
+# $$\beta^{m+1}\leftarrow \beta^{m} - \rho\cdot\nabla R(\beta^{m})$$
+#
+# `find_local_min()` takes an initial condition $\beta^0$ and adjusts it based on the gradient evaluated at that point, to get a new value $\beta^1$. The gradient will be calculated using the derivative from the previous exercise 6b), evaluated at $\beta^{m}$:
+#
+# $$\nabla R(\beta^{m}) = \frac{\partial R(\beta)}{\partial \beta}\Bigr|_{\beta=\beta^{m}} = cos(\beta^{m})+1/10$$
+#
+# The process will be repeated using the new value $\beta^1$, which will be adjusted to get $\beta^2$, etc.  This process repeats until the gradient is less than a certain threshold and the function terminates, indicating a local minimum has been found:
+#
+# $$\beta^{m+1}\leftarrow \beta^{m} - \rho \cdot [cos(\beta^{m}) + 1/10]$$
+#
+# What a run looks like with $\rho=0.1$:
+# $$\beta^{1}\leftarrow \beta^{0} - 0.1 \cdot [cos(\beta^{0}) + 1/10]$$
+# $$\beta^{2}\leftarrow \beta^{1} - 0.1 \cdot [cos(\beta^{1}) + 1/10]$$
+# $$\vdots$$
 
 # %%
 def find_local_min(b_0, p = 0.1):

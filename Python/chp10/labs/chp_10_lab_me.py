@@ -43,22 +43,12 @@ from glmnet import glmnet; from glmnetPlot import glmnetPlot
 from glmnetPredict import glmnetPredict
 
 from cvglmnet import cvglmnet
-from cvglmnetPlot import cvglmnetPlot; from cvglmnetPredict import cvglmnetPredict
+from cvglmnetPredict import cvglmnetPredict
 
 # %% [markdown]
 # # 10.9.1 A Single Layer Network on the Hitters Data
 
 # %%
-Gitters = pd.read_csv('/Users/rancher/Google Drive/Coding/ISLR2/datasets/Hitters.csv')
-
-Gitters = Gitters.dropna()
-
-# R starts indexing at 1, Python starts indexing at 0, this is to make sure the indices of the dataframes match
-Gitters = Gitters.set_index(keys=np.arange(1,264)) 
-
-n = Gitters.shape[0]
-ntest = n // 3
-
 data = robjects.r("""
 library(ISLR2)
 n <- nrow(na.omit(Hitters))
@@ -66,6 +56,15 @@ set.seed(13)
 ntest <- trunc(n / 3)
 testid <- sample(1:n, ntest)
 """)
+
+Gitters = pd.read_csv('../../../datasets/Hitters.csv')
+
+Gitters = Gitters.dropna()
+
+# R starts indexing at 1, Python starts indexing at 0, this is to make sure the indices of the dataframes match
+
+
+Gitters = Gitters.set_index(keys=np.arange(1, len(Gitters) + 1)) 
 
 testid = np.sort(np.array(data))
 test_mask = Gitters.index.isin(testid)
@@ -296,8 +295,10 @@ y_train = keras.utils.to_categorical(g_train, num_classes=100)
 
 y_train.shape
 
+# %% [markdown]
+# Some code below borrowed from: https://www.binarystudy.com/2021/09/how-to-load-preprocess-visualize-CIFAR-10-and-CIFAR-100.html#cifar100-single
+
 # %%
-# Code taken from https://www.binarystudy.com/2021/09/how-to-load-preprocess-visualize-CIFAR-10-and-CIFAR-100.html#cifar100-single
 rows, columns = 5,5
 rand_idx = np.random.randint(0, 50000, rows * columns)
 rand_images = x_train[rand_idx]
@@ -355,11 +356,11 @@ model.summary()
 # # 10.9.4 Using Pretrained CNN Models
 
 # %% [markdown]
-# https://pyimagesearch.com/2016/08/10/imagenet-classification-with-python-and-keras/
-#
-# https://adamspannbauer.github.io/2018/02/14/image-classification-r-and-python/
+# Help with keras preprocessing helper functions in Python found here: https://pyimagesearch.com/2016/08/10/imagenet-classification-with-python-and-keras/
 
 # %%
+# Help with keras preprocessing helper functions found here: https://pyimagesearch.com/2016/08/10/imagenet-classification-with-python-and-keras/
+
 img_dir = './book_images'
 
 image_names = os.listdir(img_dir)
