@@ -76,13 +76,16 @@ plt.ylabel(r'$R(\beta)$');
 #
 # $$\beta^{m+1}\leftarrow \beta^{m} - \rho\cdot\nabla R(\beta^{m})$$
 #
-# `find_local_min()` takes an initial condition $\beta^0$ and adjusts it based on the gradient evaluated at that point, to get a new value $\beta^1$. The gradient will be calculated using the derivative from the previous exercise 6b), evaluated at $\beta^{m}$:
+# `find_local_min()` takes an initial condition $\beta^0$ and adjusts it based on the gradient evaluated at that point. The gradient will be calculated using the derivative from the previous exercise 6b), evaluated at $\beta^{m}$:
 #
 # $$\nabla R(\beta^{m}) = \frac{\partial R(\beta)}{\partial \beta}\Bigr|_{\beta=\beta^{m}} = cos(\beta^{m})+1/10$$
 #
-# The process will be repeated using the new value $\beta^1$, which will be adjusted to get $\beta^2$, etc.  This process repeats until the gradient is less than a certain threshold and the function terminates, indicating a local minimum has been found:
+# Using the gradient and the learning rate $\rho$, The initial condition $\beta^0$ will be adjusted to get a new value $\beta^1$.  
 #
 # $$\beta^{m+1}\leftarrow \beta^{m} - \rho \cdot [cos(\beta^{m}) + 1/10]$$
+# $$\beta^{1}\leftarrow \beta^{0} - \rho \cdot [cos(\beta^{0}) + 1/10]$$
+#
+# The process will be repeated using the new value $\beta^1$, which will be adjusted to get $\beta^2$, etc.  This process repeats until the gradient is less than a certain threshold and the function terminates, indicating a local minimum has been found:
 #
 # What a run looks like with $\rho=0.1$:
 # $$\beta^{1}\leftarrow \beta^{0} - 0.1 \cdot [cos(\beta^{0}) + 1/10]$$
