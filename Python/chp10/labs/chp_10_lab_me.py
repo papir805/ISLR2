@@ -48,6 +48,13 @@ from cvglmnetPredict import cvglmnetPredict
 # %% [markdown]
 # # 10.9.1 A Single Layer Network on the Hitters Data
 
+# %% [markdown]
+# The lab starts off by reading baseball player data from Hitters.csv and then randomly generating a list of numbers, called testids.  Testids are indices referring to rows in our testing dataset.  This list of numbers will separate the training data from the testing data when creating a model and assessing its performance.
+#
+# In order to reproduce the results from the part of the lab in Python, I need to get the same list of testids in Python.  Unfortunately, there is no easy way to generate them in Python, however I can generate them in R and send them over to Python quite easily by using the [rpy2](https://rpy2.github.io/) module.
+#
+# After I have the testids, I adjust the index of the baseball data to start at 1.  Because R starts indexing at 1, but Python starts at 0, adjusting the indices ensures that I'm using the correct rows that were used in the lab.  Failure to do so would lead to different results.
+
 # %%
 data = robjects.r("""
 library(ISLR2)
@@ -70,13 +77,31 @@ testid = np.sort(np.array(data))
 test_mask = Gitters.index.isin(testid)
 
 
+# %% [markdown]
+# In R, many models can be built using the `forumla=` parameter, which behaves like this:
+#
+# `formula = OutputFeature ~ InputFeature1 + InputFeature 2 + ...`
+#
+# When you want to use all of the features in your dataset to predict/approximate the `OutputFeature`, there's a special syntax that simplies the process, where a `.` can be used to refer to all columns in the dataset that aren't your `OutputFeature`:
+#
+# `formula = OutputFeature ~ .`
+#
+# To fit the model in R, we can use the `lm()` function, but in Python there's the `OLS()` function from the statsmodels library.  Unfortunately, `OLS()` doesn't have the same special syntax to refer to many columns at once and each individual column has to be explcitly typed into `formula=`.
+#
+# To simplify this process, I define a function `formula_from_cols()`, which will build the formulas for me.
+
 # %%
-def formula_from_cols(df, y):
-    return y + ' ~ ' + ' + '.join([col for col in df.columns if not col==y])
+def formula_from_cols(df, y, use_target, remove_intercept):
+    formula_string = ' + '.join([col for col in df.columns if not col==y])
+    if use_target == True:
+        formula_string = y + ' ~ ' + formula_string
+    if remove_intercept == True:
+        formula_string = formula_string + ' - 1'
+    return formula_string
 
 
 # %%
-formula_string = formula_from_cols(Gitters, 'Salary')
+formula_string = formula_from_cols(Gitters, 'Salary', use_target = True, remove_intercept=False)
 
 lmodel = smf.ols(formula=formula_string, data = sm.add_constant(Gitters[~test_mask]))
 
@@ -86,7 +111,17 @@ lpred = lfit.predict(Gitters[test_mask])
 
 np.mean(abs(lpred - Gitters[test_mask]['Salary']))
 
+# %% [markdown]
+# Using this linear regression model to predict a baseball player's salary, the mean absolute error (MAE) is the same as the lab from the textbook.
+
+# %% [markdown]
+# Next, the lab goes on to fit a lasso regresson model on the same dataset, however the dataset needs some preprocessing beforehand.  In R, the lab uses the `model.matrix()` function to create what's called a [design matrix](https://www.statlect.com/glossary/design-matrix), but in Python we can use the [Patsy](https://patsy.readthedocs.io/en/latest/) library and the `dmatrix()` function.  
+#
+# Among other things, Patsy will take categorical variables, such as `League` or `Division` from the baseball dataset and convert them into dummy variables.  We can also use Patsy to scale the dataset, however we need to set `ddof=1` so that Patsy divides by the square root of the unbiased estimator of the variance as opposed to the maximum likelihood estimate.
+
 # %%
+formula_string = formula_from_cols(Gitters, 'Salary', use_target = False, remove_intercept=True)
+
 x = patsy.dmatrix(formula_like = 'AtBat + Hits + HmRun + Runs + RBI + Walks + Years + CAtBat + CHits + CHmRun + CRuns + CRBI + CWalks + League + Division + PutOuts + Assists + Errors + NewLeague - 1', data = Gitters)
 
 x_scale = patsy.scale(x, ddof=1)
@@ -111,7 +146,12 @@ cpred = cvglmnetPredict(cvfit, newx = x_scale[test_mask], s = 'lambda_min')
 np.mean(abs(y[test_mask] - cpred))
 
 # %% [markdown]
-# I'm getting a much higher MAE than the ISLR textbook does (they get 252.2994) and I'm not entirely sure why.  As far as I can tell, the inputs, `x_scale` and `y` are the same as in the textbook, however the predictions (`cpred`) are slightly different, leading to a different MAE.  I need to investigate further.
+# I'm getting a much higher MAE than the ISLR textbook does (they get ~253) and I'm not entirely sure why.  As far as I can tell, the inputs, `x_scale` and `y` are the same as in the textbook, however the predictions (`cpred`) are different, leading to a different MAE.  I need to investigate further.
+
+# %% [markdown]
+# Lastly, the lab uses the `keras` library in R to create a neural network to predict Salary from the baseball dataset.  The neural model has one hidden layer with 50 units that activate based on the `relu` activation function, then a dropout layer with a dropout rate of 40%, and finally an output layer with a single output, the predicted salary.
+#
+# The neural network will treat each row of our design matrix as an input vector.  Because the design matrix has 20 columns, each input vectors will have 20 features, one for each column.  Each feature of the input vectors will be fed into the 50 units in the first hidden layer.  The output of this first hidden layer will be either 0 or 1 based on the `relu` function, where an output of 1 means that the neuron "fired".  These outputs are then fed into the next layer, the dropout layer, where 40% of the outputs will be excluded and before being fed into the last layer, the output layer.
 
 # %%
 modnn = keras.Sequential(
@@ -121,6 +161,9 @@ modnn = keras.Sequential(
             layers.Dense(units=1)
     ]
 )
+
+# %% [markdown]
+# After defining the neural network model, we compile and fit it to our dataset, then view the model's performance over time.
 
 # %%
 modnn.compile(
@@ -161,6 +204,11 @@ npred = modnn.predict(X_test)
 
 # %% tags=[]
 np.mean(abs(y_test - npred.flatten()))
+
+# %% [markdown]
+# The graph above shows that after about 800 training epochs, the validation MAE settles down and remains constant roughly at 250.  This is close to what the book gets (they get 257.43) and is close to what our linear regression model in the first part of this lab got (254.6687).  
+#
+# Because the dropout layer drops at random, I don't think it's possible to reproduce the results from the lab in R exactly, however the MAE is close enough and the plots above are quite similar to the plots in R, such that I'm confident I've reproduced the lab's results as much as possible.
 
 # %% [markdown]
 # # 10.9.2 A Multilayer Network on the MNIST Digit Data
@@ -464,6 +512,11 @@ ival <- sample(seq(1:25000), 2000)
 
 ival = np.sort(np.array(data) - 1)
 ival_mask = pd.DataFrame(x_train_1h.toarray()).index.isin(ival)
+
+# %% [markdown]
+# This article was used as a reference for how to select rows from a sparse matrix so that I could filter using the ival_mask to separate training and testing observations: 
+#
+# https://cmdlinetips.com/2019/07/how-to-slice-rows-and-columns-of-sparse-matrix-in-python/
 
 # %%
 fitlm = glmnet(x=x_train_1h.tocsr()[~ival_mask].toarray(),
