@@ -233,7 +233,13 @@ y_train = keras.utils.to_categorical(g_train, num_classes=10)
 y_test = keras.utils.to_categorical(g_test, num_classes=10)
 
 # %% [markdown]
-# The lab describes how neural networks are sensitive to the scale of the inputs.  Since our dataset consists of grayscale images, each pixel in the image will have a value between 0 and 255.  Dividing by 255 will scale all values down such that they are now between 0 and 1, which is equivalent to what's known as [Min-Max scaling](https://en.wikipedia.org/wiki/Feature_scaling#Rescaling_(min-max_normalization)).
+# The lab describes how neural networks are sensitive to the scale of the inputs.  Since our dataset consists of grayscale images, each pixel in the image will have a value between 0 and 255.  Because our minimum value is 0, dividing by 255 will scale all values down such that they are now between 0 and 1, which is equivalent to what's known as [Min-Max scaling](https://en.wikipedia.org/wiki/Feature_scaling#Rescaling_(min-max_normalization)).
+#
+# $$x_\text{new} = \frac{x_\text{old}-min(x)}{max(x)-min(x)}$$
+#
+# $$x_\text{new} = \frac{x_\text{old}-0}{255-0}$$
+#
+# $$x_\text{new} = \frac{x_\text{old}}{255}$$
 
 # %%
 x_train = x_train / 255
