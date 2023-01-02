@@ -131,6 +131,9 @@ y = np.array(Gitters['Salary'])
 # %%
 x.design_info.column_names
 
+# %% [markdown]
+# In R, the `glmnet` library can be used to fit the lasso regression model, but in Python, the [glmnet_python](https://glmnet-python.readthedocs.io/en/latest/) library is needed.
+
 # %%
 X_train = x_scale[~test_mask]
 X_test = x_scale[test_mask]
@@ -164,6 +167,8 @@ modnn = keras.Sequential(
 
 # %% [markdown]
 # After defining the neural network model, we compile and fit it to our dataset, then view the model's performance over time.
+#
+# When compiling the model, we define loss as mean squared error (MSE), which is what the neural network will try to minimize during the training process.  By defining extra metrics, such as MAE, the model will also keep track of the MAE during the training process.  Because the model is trying to predict salary, both MSE and MAE make sense to track the model's performance, however we'll see different metrics are needed later when trying to solve classification problems.
 
 # %%
 modnn.compile(
@@ -263,6 +268,11 @@ modelnn = keras.Sequential(
     ]
 )
 
+# %% [markdown]
+# In this example, the model is trying to solve a classification problem with 10 potential categories to predict.  
+#
+# Minimizing MSE doesn't make sense anymore and `categorical_crossentropy` should be used as the loss function that the model will try to minimize instead.  Accuracy will also be tracked during the training process, as MAE also doesn't make sense for a classification problem.
+
 # %%
 modelnn.compile(
     loss='categorical_crossentropy', 
@@ -338,6 +348,9 @@ modellr = keras.models.Sequential(
     ]
 )
 
+# %% [markdown]
+# Same as before, the model is trying to solve a classification problem with 10 potential classes to predict.  The model will try to minimize `categorical_crossentropy` as its loss function.
+
 # %%
 modellr.compile(
     loss='categorical_crossentropy', 
@@ -388,6 +401,13 @@ modellr_acc
 # %% [markdown]
 # # 10.9.3 Convolutional Neural Networks
 
+# %% [markdown]
+# This next lab focuses on a special kind of neural network known as Convolutional Neural Networks (CNN).  According to the text, CNNs recognize specific patterns in an image and use these patterns to make a classification.  
+#
+# The CNN will start by recognizing what are called low-level features, which include edges of shapes, patches of color, etc., which are combined to make distinct higher-level features that distinguish objects in a photo, such as the wheels or headlights of a car, or the eyes and nose in of a person's face.  By learning these higher-level features, the model can make better classifications based on what features it detects in a photo and what features are missing.
+#
+# For instance, if you zoomed into a photo such that you could only see a round object, such as the headlights of a car or the eye of a human, it would be hard for the CNN to tell whether the the photo was of a car or a person, and might assign equal probabilities to both.  However, if you zoomed out to reveal more of the photo and the CNN detected the presence of other features, such as a nose, it would assign a higher probability to the photo being a person as opposed to being a car.  Essentially, the CNN uses the greater context of a photo to make up its mind.
+
 # %%
 (x_train, g_train), (x_test, g_test) = keras.datasets.cifar100.load_data()
 
@@ -404,7 +424,7 @@ y_train = keras.utils.to_categorical(g_train, num_classes=100)
 y_train.shape
 
 # %% [markdown]
-# Some code below borrowed from: https://www.binarystudy.com/2021/09/how-to-load-preprocess-visualize-CIFAR-10-and-CIFAR-100.html#cifar100-single
+# The lab displays a random set of 25 pictures from the dataset, however I was unsure how to display images in Python, so I borrowed some code from: https://www.binarystudy.com/2021/09/how-to-load-preprocess-visualize-CIFAR-10-and-CIFAR-100.html#cifar100-single.
 
 # %%
 rows, columns = 5,5
@@ -419,6 +439,13 @@ for i in range(1, columns * rows + 1):
 plt.tight_layout()
 plt.show()
 
+# %% [markdown]
+# The complexity of this model increases significantly, using two new types of layers, `Conv2D` and `MaxPooling2d`.  Both of these types of layers are fairly complicated and would be important if working on image classification.  
+#
+# These topics don't come up much for me and I don't feel it's important to understand well how they work at the moment, but I'll provide a brief summary their purpose:
+# - A convolution layer distorts an image in such a way that the convolved image hightlights sections of the image that are similar to convolution filter.  For instance, a convolution filter might be one of a circle.  The convolved image would hightlight areas of the image that are circular.
+# - A pooling layer condenses large images into smaller images.  Certain sections of the data are dropped and the rest is pooled back together.  Because data is lost in the process, the smaller image acts as a summary of the original. A max pooling layer keeps data that is the maximum within a given section of the data, dropping the remaining smaller values.
+
 # %%
 model = keras.models.Sequential(
     [
@@ -431,6 +458,9 @@ model = keras.models.Sequential(
         layers.Conv2D(filters=128, kernel_size=(3,3),
                      padding='same', activation='relu'),
         layers.MaxPooling2D(pool_size=(2,2)),
+        layers.Conv2D(filters=256, kernel_size=(3,3),
+                     padding='same', activation='relu'),
+        layers.MaxPool2D(pool_size=(2,2)),
         layers.Flatten(),
         layers.Dropout(rate=0.5),
         layers.Dense(units=512, activation='relu'),
@@ -452,23 +482,44 @@ history = model.fit(x_train,
                     validation_split=0.2,
                     verbose=0)
 
+model.summary()
+
+# %%
 y_proba = model.predict(x_test)
 y_pred_classes = np.argmax(y_proba, axis=-1)
 
 np.mean(y_pred_classes == g_test.flatten())
 
 # %%
-model.summary()
+fig, ax = plt.subplots(2, 1, sharex = True, figsize=(8,6))
+
+ax[0].plot(history.history['loss'])
+ax[0].plot(history.history['val_loss'])
+ax[0].set_title('model loss')
+ax[0].set_ylabel('loss')
+ax[0].set_xlabel('epoch')
+ax[0].legend(['Train', 'Validation'])
+
+ax[1].plot(history.history['accuracy'])
+ax[1].plot(history.history['val_accuracy'])
+ax[1].set_title('model accuracy')
+ax[1].set_ylabel('accuracy')
+ax[1].set_xlabel('epoch')
+ax[1].legend(['Train', 'Validation'])
+
+plt.tight_layout();
 
 # %% [markdown]
 # # 10.9.4 Using Pretrained CNN Models
 
 # %% [markdown]
-# Help with keras preprocessing helper functions in Python found here: https://pyimagesearch.com/2016/08/10/imagenet-classification-with-python-and-keras/
+# This part of the lab focuses on using a pretrained CNN model called `resnet50`, which was trained on a data base of natural images called `imagenet`.  Because `reset50` is already trained, we can immediately use it to make predictions. 
+#
+# The book provides several images to feed to the model, however they need some preprocessing done first.  `keras` has some built in built in helper functions that perform the necessary preprocessing.
+#
+# I found help with understanding how to use the `keras` preprocessing helper functions here: https://pyimagesearch.com/2016/08/10/imagenet-classification-with-python-and-keras/
 
 # %%
-# Help with keras preprocessing helper functions found here: https://pyimagesearch.com/2016/08/10/imagenet-classification-with-python-and-keras/
-
 img_dir = './book_images'
 
 image_names = os.listdir(img_dir)
@@ -486,10 +537,16 @@ x = np.array(x)
 
 x = preprocess_input(x)
 
+# %% [markdown]
+# Below is a summary of `resnet50`, showing the many, many layers that make up the neural network.  This model would be far too complicated to produce. onyour own, but because it's been tweaked and curated over time, it should perform well.
+
 # %% tags=[]
 model = keras.applications.resnet50.ResNet50(weights='imagenet')
 
 model.summary()
+
+# %% [markdown]
+# Feeding the images we want to classify into `resnet5` and using the `top=3` parameter, we can see the top 3 most likely labels for each image, as well as their probabilities.
 
 # %%
 pred6 = model.predict(x)
@@ -498,12 +555,23 @@ keras.applications.imagenet_utils.decode_predictions(pred6, top=3)
 # %% [markdown]
 # # 10.9.5 IMDb Document Classification
 
+# %% [markdown]
+# This part of the lab uses movie review data from the [Internet Movie Database](www.imdb.com), to perform sentiment analysis and classify a review as either positive or negative.  The dataset is part of the `keras` package and `num_words` specifies how many words will be in the `word_index` object, discussed soon.
+
 # %%
 max_features = 10_000
 (x_train, y_train), (x_test, y_test) = keras.datasets.imdb.load_data(num_words=max_features)
 
+# %% [markdown]
+# Reviews in the dataset aren't stored as strings of words that make up the review, rather each review is a series of numbers that correspond to the values in the word_index object mentioned earlier.  The `word_index` is a dictionary where a key is the string representation of a word and the value will be an integer representing that word, such that `word_index['word_string'] = some_int`.
+#
+# For instance, the thirteen integers found below represent the first thirteen words in a review.
+
 # %%
 x_train[0][0:12]
+
+# %% [markdown]
+# The `decode_review()` function does just that, it takes the integer representations of words in a review and converts them to the string representation by using the `word_index`.  The thirteen words mentioned earlier are decoded below:
 
 # %%
 word_index = keras.datasets.imdb.get_word_index()
@@ -530,6 +598,15 @@ def decode_review(text: list, word_index: dict):
     
 decode_review(x_train[0][0:12], word_index)
 
+
+# %% [markdown]
+# The next part of the lab was challenging as I had to reproduce the `one_hot()` function that was created in the lab.  
+#
+# This function takes a review and returns a sparse matrix where each row in the matrix represents a review and each column represents a word in the `word_index`.  Each row will contain 0s or 1s, indicating whether a word is present in the review or not.
+#
+# To recreate this function in Python, I had to learn more about sparse matrices and the `sparse` module of the `scipy` library.  The general utility of a sparse matrix is that it allows for more convenient storage of large datasets, when the meaningful entries are sparse (not 0).
+#
+# Since we have such a large `word_index`, most of those words won't be present in a review and a row will contain many more 0s than 1s.  Using a sparse matrix will save space in memory and training the neural network will run much faster too.
 
 # %%
 def one_hot(sequences, dimension):
@@ -561,6 +638,9 @@ x_test_1h = one_hot(x_test, 10000)
 
 x_train_1h.shape
 
+# %% [markdown]
+# After using the `one_hot()` function, only about 1.3% of the entries are non-zero, which is why using a sparse matrix is so preferable. 
+
 # %%
 x_train_1h.count_nonzero() / (25000 * 10000)
 
@@ -574,9 +654,15 @@ ival = np.sort(np.array(data) - 1)
 ival_mask = pd.DataFrame(x_train_1h.toarray()).index.isin(ival)
 
 # %% [markdown]
-# This article was used as a reference for how to select rows from a sparse matrix so that I could filter using the ival_mask to separate training and testing observations: 
+# The lab once again uses the `sample()` function from R to randomly generate numbers that will refer to indices for training and testing data.  I use [rpy2](https://rpy2.github.io/) once more to replicate these values and then turn them into a boolean mask.
 #
+# The boolean mask has worked just fine in earlier parts of the lab, when the data was stored in a `Pandas` dataframe, however the sparse matrices from `Scipy` are different and a boolean mask doesn't work unless the sparse matrix is converted to a compressed sparse row (CSR) matrix first.  
+#
+# This article was used as a reference for how to select rows from a sparse matrix so that I could use `ival_mask` (the boolean mask) to separate training and testing observations:
 # https://cmdlinetips.com/2019/07/how-to-slice-rows-and-columns-of-sparse-matrix-in-python/
+
+# %% [markdown]
+# The lab starts by first using lasso logistic regression to predict positive/negative IMDb reviews.  In order to reproduce the results, I had to use the [glmnet_python](https://glmnet-python.readthedocs.io/en/latest/) library once more.
 
 # %%
 fitlm = glmnet(x=x_train_1h.tocsr()[~ival_mask].toarray(),
@@ -598,6 +684,11 @@ plt.ylabel("acclmv");
 
 # %%
 glmnetPlot(fitlm, xvar='lambda');
+
+# %% [markdown]
+# Since the purpose of this model is to classify a review as either positive or negative, this is a binary classifcation problem, slightly different than the classification problems from parts 10.9.3 and 10.9.4 of the lab.  
+#
+# Consequently, the loss function is defined as `binary_crossentropy` instead of the `categorical_crossentropy` seen earlier.  Because it's still a classification problem, it still makes sense to track accuracy during the training process.
 
 # %%
 model = keras.models.Sequential(
@@ -643,6 +734,9 @@ ax[1].legend(['Train', 'Validation'])
 
 plt.tight_layout();
 
+# %% [markdown]
+# This model was generated using training data that was split into a training and validation set.  The figure above shows training loss/accuracy and validation loss/accuracy of that model epoch by epoch.
+
 # %% tags=[]
 history2 = model.fit(x = x_train_1h.tocsr()[~ival_mask], 
                      y = y_train[~ival_mask], 
@@ -661,16 +755,19 @@ ax[0].plot(history2.history['val_loss'])
 ax[0].set_title('model loss')
 ax[0].set_ylabel('loss')
 ax[0].set_xlabel('epoch')
-ax[0].legend(['Train', 'Validation'])
+ax[0].legend(['Train', 'Test'])
 
 ax[1].plot(history2.history['accuracy'])
 ax[1].plot(history2.history['val_accuracy'])
 ax[1].set_title('model accuracy')
 ax[1].set_ylabel('accuracy')
 ax[1].set_xlabel('epoch')
-ax[1].legend(['Train', 'Validation'])
+ax[1].legend(['Train', 'Test'])
 
 plt.tight_layout();
+
+# %% [markdown]
+# Another model was generated from the same training data as the last model, however it was validated against test data.  The figure above shows training loss/accuracy and test loss/accuracy epoch by epoch.  
 
 # %% [markdown]
 # # 10.9.6 Recurrent Neural Networks
