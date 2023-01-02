@@ -213,6 +213,9 @@ np.mean(abs(y_test - npred.flatten()))
 # %% [markdown]
 # # 10.9.2 A Multilayer Network on the MNIST Digit Data
 
+# %% [markdown]
+# This lab demonstrates the ability of a neural network to recognize and classify digits 0-9 from pictures of hand written digits.  The mnist dataset, which can be found in the `keras` library contains many such images and is first loaded into a training and testing dataset
+
 # %%
 (x_train, g_train), (x_test, g_test) = keras.datasets.mnist.load_data()
 
@@ -226,16 +229,22 @@ x_test.shape
 x_train = np.reshape(x_train, newshape=(x_train.shape[0], 784))
 x_test = np.reshape(x_test, newshape=(x_test.shape[0], 784))
 
-# %%
-# y_train = pd.get_dummies(g_train)
-# y_test = pd.get_dummies(g_test)
-
 y_train = keras.utils.to_categorical(g_train, num_classes=10)
 y_test = keras.utils.to_categorical(g_test, num_classes=10)
+
+# %% [markdown]
+# The lab describes how neural networks are sensitive to the scale of the inputs.  Since our dataset consists of grayscale images, each pixel in the image will have a value between 0 and 255.  Dividing by 255 will scale all values down such that they are now between 0 and 1, which is equivalent to what's known as [Min-Max scaling](https://en.wikipedia.org/wiki/Feature_scaling#Rescaling_(min-max_normalization)).
 
 # %%
 x_train = x_train / 255
 x_test = x_test / 255
+
+# %% [markdown]
+# The neural network in this lab increases in complexity by adding a second hidden layer.  
+#
+# Each feature of an input vector will first be fed into each of the 256 neurons in the first hidden layer, where 40% of the outputs will be dropped, before feeding the remainder into each of the 128 neurons in the second hidden layer.  Finally, 30% of the outputs from the second hidden layer will be dropped before being passed to the 10 units in the final output layer.
+#
+# The output layer uses the 'softmax' activation function, which will compute the probability for each of the 10 units in the output layer, which will correspond to the probability of each digit 0-9 being written in a given picture.
 
 # %%
 modelnn = keras.Sequential(
@@ -285,16 +294,36 @@ ax[1].legend(['Train', 'Validation'])
 
 plt.tight_layout();
 
+# %% [markdown]
+# The `softmax` activation function will output the probability of each of the 10 digits being written in the photo, like so:
+#     
+# `[prob_of_digit_0, prob_of_digit_1, ..., prob_of_digit9]`
+#
+# Using these probabilities, we can base the prediction on which digit has the highest probability.
+#
+# The `np.argmax()` function with `axis=1` will return the index of the maximum value (probability) in each row.  Since NumPy arrays begin indexing at 0, the index of the row will correspond to digit with the highest probability, the one that we want to use as the prediction.
+
 # %%
 y_proba = modelnn.predict(x_test)
 y_pred_classes = np.argmax(y_proba, axis=1)
+
+# %%
+y_pred_classes
 
 # %%
 modelnn_acc = np.mean(y_pred_classes == g_test)
 modelnn_acc
 
 # %% [markdown]
+# The neural network does well with 98% accuracy, close to the accuracy from the textbook (0.9813).  Again, because the dropout layers drop randomly, I don't think it's possible to recreate the results from the lab exactly, but these are very close.
+
+# %% [markdown]
 # ## Multiclass Logistic Regression
+
+# %% [markdown]
+# This part of the lab shows how `keras` can perform multiclass logistic regression.  The lab mentions that `glmnet` library, which was used in lab 10.9.1, can also perform multiclass logistic regression, `keras` does it more quickly.  
+#
+# When constructing the `keras` model there is just a single output layer with 10, which uses the `softmax` activation function, similar to before.
 
 # %%
 modellr = keras.models.Sequential(
@@ -310,12 +339,34 @@ modellr.compile(
     metrics='accuracy')
 
 # %%
-modellr.fit(x_train, 
+history = modellr.fit(x_train, 
             y_train, 
             epochs=30, 
             batch_size=128, 
             validation_split=0.2,
             verbose=0)
+
+# %%
+fig, ax = plt.subplots(2, 1, sharex = True, figsize=(8,6))
+
+ax[0].plot(history.history['loss'])
+ax[0].plot(history.history['val_loss'])
+ax[0].set_title('model loss')
+ax[0].set_ylabel('loss')
+ax[0].set_xlabel('epoch')
+ax[0].legend(['Train', 'Validation'])
+
+ax[1].plot(history.history['accuracy'])
+ax[1].plot(history.history['val_accuracy'])
+ax[1].set_title('model accuracy')
+ax[1].set_ylabel('accuracy')
+ax[1].set_xlabel('epoch')
+ax[1].legend(['Train', 'Validation'])
+
+plt.tight_layout();
+
+# %% [markdown]
+# The `np.argmax()` function needs to be used again to determine which digit has the highest probability, in order to make the prediction,
 
 # %%
 y_proba = modellr.predict(x_test)
@@ -324,6 +375,9 @@ y_pred_classes = np.argmax(y_proba, axis=1)
 # %%
 modellr_acc = np.mean(y_pred_classes == g_test)
 modellr_acc
+
+# %% [markdown]
+# The accuracy for this logistic regression model is quite close to what was found in the lab (0.9286).  It's a little lower when compared to ~98% in the neural network, but the model is far simpler and if interpretability matters, would be way easier to interpret.
 
 # %% [markdown]
 # # 10.9.3 Convolutional Neural Networks
