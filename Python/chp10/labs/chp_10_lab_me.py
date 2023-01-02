@@ -490,24 +490,8 @@ y_pred_classes = np.argmax(y_proba, axis=-1)
 
 np.mean(y_pred_classes == g_test.flatten())
 
-# %%
-fig, ax = plt.subplots(2, 1, sharex = True, figsize=(8,6))
-
-ax[0].plot(history.history['loss'])
-ax[0].plot(history.history['val_loss'])
-ax[0].set_title('model loss')
-ax[0].set_ylabel('loss')
-ax[0].set_xlabel('epoch')
-ax[0].legend(['Train', 'Validation'])
-
-ax[1].plot(history.history['accuracy'])
-ax[1].plot(history.history['val_accuracy'])
-ax[1].set_title('model accuracy')
-ax[1].set_ylabel('accuracy')
-ax[1].set_xlabel('epoch')
-ax[1].legend(['Train', 'Validation'])
-
-plt.tight_layout();
+# %% [markdown]
+# The test accuracy is ~44%, close to 0.4561, which was found in the lab.
 
 # %% [markdown]
 # # 10.9.4 Using Pretrained CNN Models
@@ -689,6 +673,8 @@ glmnetPlot(fitlm, xvar='lambda');
 # Since the purpose of this model is to classify a review as either positive or negative, this is a binary classifcation problem, slightly different than the classification problems from parts 10.9.3 and 10.9.4 of the lab.  
 #
 # Consequently, the loss function is defined as `binary_crossentropy` instead of the `categorical_crossentropy` seen earlier.  Because it's still a classification problem, it still makes sense to track accuracy during the training process.
+#
+# Because this is a binary classification problem, the `softmax` function isn't needed and the final output layer uses the `sigmoid` function instead.  The `sigmoid` function will return probabilities that the label is 1, or true.
 
 # %%
 model = keras.models.Sequential(
@@ -772,9 +758,26 @@ plt.tight_layout();
 # %% [markdown]
 # # 10.9.6 Recurrent Neural Networks
 
+# %% [markdown]
+# The last lab highlights what are known as Recurrent Neural Networks (RNN) and are best used when the order or sequencing of inputs to the model carries information and is important.  The book gives several examples:
+#    * Documents Classification: Word ordering is important and paying attention to the order in which words in a document are placed may help with the classification process.  For instance, "the sauce on my pizza" versus "the pizza on my sauce" are the same words but convey different meaning because the words are in a different order.  
+#        - The first part of Lab 10.9.6 revisits sentiment analysis for IMDb reviews.
+#    * Time series: temperature, rainfall, etc, where times early in the year and going to be colder or more rainy, whereas times in the middle of the year will be hotter with less rainfall.  
+#        - The later part of lab 10.9.6 focuses on time series data from the New York Stock Exchange (NYSE)
+#    * Recordings: Recorded speech, musical recordings, other sound recordings.  In many ways this is similar to document classification as recorded speech or music and constructed with specific sequences in mind.
+#    * Handwriting: Similar to recordings or document classification.  
+#     
+# For the most part, it seems things related to human communication are prime targets for RNN.
+
+# %% [markdown]
+# ## Sentiment analysis with IMDb again
+
 # %%
 max_features = 10_000
 (x_train, y_train), (x_test, y_test) = keras.datasets.imdb.load_data(num_words=max_features)
+
+# %% [markdown]
+# The median word count is 178, with ~92% of reviews containing less than 500 words.  The RNN requires the dimensions of your input to be constant, so we need to do some preprocessing before fitting the model. 
 
 # %%
 wc = []
@@ -789,10 +792,13 @@ np.median(wc)
 # %%
 sum(wc <= 500) / len(wc)
 
-# %%
-maxlen = 500
-(x_train, y_train), (x_test, y_test) = keras.datasets.imdb.load_data(num_words=max_features)
 
+# %% [markdown]
+# R has a function called `pad_sequences()`, which can insert blank values at the start of a sequence, elongating it until it reaches the desires amount of values needed.  
+#
+# NumPy has a pad function, however to my knowledge, it doesn't function exactly like `pad_sequences()` does in R, and I have to write a custom function that picks up the slack.
+#
+# My function checks the length of each row in a dataframe and for rows that are shorter than desired, 0s are padded at the start of the row until it reaches the desired length.  For rows that are longer than desired, then we keep the last 500 words.  The result is a new dataset than has 500 values for each review.
 
 # %%
 def pad_sequences(data, maxlen):
@@ -813,6 +819,8 @@ def pad_sequences(data, maxlen):
 
 
 # %%
+maxlen = 500
+
 x_train = pad_sequences(x_train, maxlen)
 x_test = pad_sequences(x_test, maxlen)
 
@@ -823,6 +831,11 @@ x_test.shape
 
 # %%
 x_train[0, 489:500]
+
+# %% [markdown]
+# When creating the model, there are two new layers, `Embedding` and `LSTM` that are used.  At this point, I don't need to be extremely familiar with their inner workings and won't worry about these details too much.  A quick summary is as follows:
+#    * An embedding layer does the one hot encoding for us and reduces the dimensionality from 10000 words down to just 32.  
+#    * LSTM stands for long term and short term memory.  The book doesn't go into much detail about this kind of layer, but mentions how the model keeps tracks of sequences of neuron activations through time.  Typically, the output of a layer in a neural network becomes the only inputs for the next layer, however LSTM enables the model to feed input from hidden units further back in time into the current layer as well, hence the term long term and short term memory.  
 
 # %%
 model = keras.models.Sequential(
@@ -848,11 +861,6 @@ history = model.fit(x = x_train,
                     verbose=0)
 
 # %%
-predy = model.predict(x_test) > 0.5
-
-np.mean(y_test == predy.flatten())
-
-# %%
 fig, ax = plt.subplots(2, 1, sharex = True, figsize = (8,6))
 
 ax[0].plot(history.history['loss'])
@@ -871,8 +879,24 @@ ax[1].legend(['Train', 'Validation'])
 
 plt.tight_layout();
 
+# %%
+predy = model.predict(x_test) > 0.5
+
+np.mean(y_test == predy.flatten())
+
+# %% [markdown]
+# The testing accuracy of the RNN is ~87%, which is very close to the 0.8721 found in the lab.
+
 # %% [markdown]
 # ## Time Series Prediction
+
+# %% [markdown]
+# The final part of the lab uses time series data of the New York Stock Exchange (NYSE) to predict trading volume.
+
+# %% [markdown]
+# The NYSE dataset is found in the ISLR2 library in R, however I was unable to find that dataset elsewhere.  I use the rpy2 library in Python to get the NYSE data , then scale the data using standard scaling:
+#     
+# $$x_\text{new}=\frac{x_\text{old}-\mu_x}{\sigma_x}$$
 
 # %% tags=[]
 data = robjects.r("""
@@ -890,6 +914,9 @@ istrain = np.array(data)
 
 xdata = (xdata - xdata.mean()) / xdata.std()
 
+
+# %% [markdown]
+# The `lagm()` function is used to generate lagged versions of the data, by inserting k rows at the top of each column in a dataset and removing k rows from the bottom.
 
 # %%
 def lagm(df, prefix, k=1):
@@ -919,14 +946,20 @@ arframe = pd.concat(
     ], axis=1
 )
 
+# %% [markdown]
+# Because values in the first 5 rows have been padded, some of the values will be missing.  As such, those rows are excluded and only the remaining rows will be used.
+
 # %%
 arframe = arframe[5:]
 istrain = istrain[5:]
 
+# %% [markdown]
+# Using `smf.ols()` again, we can mimic R's `lm()` function to perform the regression and predit `log_volume`.  After generating the predictions, performance is measured using $R^2$.
+
 # %%
 training_mask = istrain.astype(bool)
 
-formula_string = formula_from_cols(arframe, 'log_volume')
+formula_string = formula_from_cols(arframe, 'log_volume', use_target = True, remove_intercept = False)
 
 armodel = smf.ols(formula=formula_string, data = sm.add_constant(arframe[training_mask]))
 
@@ -935,6 +968,12 @@ arfit = armodel.fit()
 arpred = arfit.predict(arframe[~training_mask])
 V_0 = arframe[~training_mask]['log_volume'].var()
 1 - np.mean((arpred - arframe[~training_mask]['log_volume'])**2) / V_0
+
+# %% [markdown]
+# The lagged linear model has $R^2=0.4132$, which is the same as in the lab.
+
+# %% [markdown]
+# Next, information regarding `day_of_week` is pulled from the NYSE dataset and a new lagged linear model is fit using `smf.ols()`.
 
 # %% tags=[]
 data = robjects.r("""
@@ -945,7 +984,7 @@ day_df = pd.DataFrame(np.array(data), columns=['day'])
 
 arframed = pd.concat([day_df[5:], arframe], axis=1)
 
-formula_string = formula_from_cols(arframed, 'log_volume')
+formula_string = formula_from_cols(arframed, 'log_volume', use_target = True, remove_intercept = False)
 
 armodeld = smf.ols(formula=formula_string, data = sm.add_constant(arframed[training_mask]))
 
@@ -954,14 +993,30 @@ arfitd = armodeld.fit()
 arpredd = arfitd.predict(arframed[~training_mask])
 1 - np.mean((arpredd - arframed[~training_mask]['log_volume']) ** 2) / V_0
 
+# %% [markdown]
+# This new model performs slightly better than the old, achieving $R^2=0.4597$, which is the same as in the lab.
+
+# %% [markdown]
+# Next, the lab uses a RNN to try and predict `log_volume`, however the dataset needs to be preprocessed, specifically it needs to be reshaped, before being used in the RNN.  Of particular interest was the need to specify `order='F'` when reshaping the data, which puts the array in what is known as Fortran order.  Because R uses Fortran quite a bit, this is important so that Python processes the data in the same way R does.
+
 # %%
 n = arframe.shape[0]
+# This step extracts the n X 15 matrix of lagged versions of the three predictor variables
 xrnn = pd.DataFrame(arframe.iloc[:,1:])
+
+# These two steps construct an array of shape (n, 3, 5) in Fortran order
 xrnn = np.array(xrnn)
 xrnn = xrnn.reshape((n, 3, 5), order='F')
+
+# This step reverses the order of the lagged variables, so that index 0 in our sequence is furthest in time and index 5 is further away in time.
 xrnn = xrnn[:,:,::-1]
+
+# This last step rearranges the array into shape (n, 5, 3), which is what the RNN will
 xrnn = xrnn.transpose((0,2,1))
 xrnn.shape
+
+# %% [markdown]
+# Because this model is predicting `log_volume` which is quantitative, it makes sense to use MSE as the loss function again.  The model will minimize MSE during training.
 
 # %%
 model = keras.models.Sequential(
@@ -985,9 +1040,6 @@ history = model.fit(
     verbose=0
 )
 
-kpred = model.predict(xrnn[~training_mask])
-1 - np.mean((kpred.flatten() - arframe[~training_mask]['log_volume'])**2) / V_0
-
 # %%
 plt.plot(history.history['loss'])
 plt.plot(history.history['val_loss'])
@@ -997,9 +1049,22 @@ plt.xlabel('epoch')
 plt.legend(['Train', 'Validation']);
 
 # %%
+kpred = model.predict(xrnn[~training_mask])
+1 - np.mean((kpred.flatten() - arframe[~training_mask]['log_volume'])**2) / V_0
+
+# %% [markdown]
+# The $R^2$ of the RNN is ~41%, close to the 0.416 from the lab.  Because of the dropout parameter in the SimpleRNN layer, I don't think it's possible to reproduce the $R^2$ from the lab exactly.
+
+# %% [markdown]
+# Lastly, the final part of this lab uses `keras` to construct a nonlinear regression model to predict `log_volume`, however first `patsy` is used to create a design matrix again.
+
+# %%
 x = patsy.dmatrix(formula_like = 'day + L1_DJ_return + L1_log_volume + L1_log_volatility + L2_DJ_return + L2_log_volume + L2_log_volatility + L3_DJ_return + L3_log_volume + L3_log_volatility + L4_DJ_return + L4_log_volume + L4_log_volatility + L5_DJ_return + L5_log_volume + L5_log_volatility - 1', data = arframed)
 
 x.design_info.column_names
+
+# %% [markdown]
+# With the design matrix in hand, a `keras` model with 32 units in the first hidden layer, a dropout layer with a dropout rate of 50%, and finally an output layer with one unit, which will represent the predicted `log_volume`.  The model will again minimize MSE during training as it's predicting a quantitative output.
 
 # %%
 arnnd = keras.models.Sequential(
@@ -1020,9 +1085,6 @@ history = arnnd.fit(
     verbose = 0
 )
 
-npred = arnnd.predict(x[~training_mask])
-1 - np.mean((arframe[~training_mask]['log_volume'] - npred.flatten())**2) / V_0
-
 # %%
 plt.plot(history.history['loss'])
 plt.plot(history.history['val_loss'])
@@ -1030,6 +1092,13 @@ plt.title('model loss')
 plt.ylabel('loss')
 plt.xlabel('epoch')
 plt.legend(['Train', 'Validation']);
+
+# %%
+npred = arnnd.predict(x[~training_mask])
+1 - np.mean((arframe[~training_mask]['log_volume'] - npred.flatten())**2) / V_0
+
+# %% [markdown]
+# The nonlinear regression model achieves accuracy of ~47%, close to the 0.4698 found in the lab.  I don't think it's possible to reproduce the results of the lab exactly because of the dropout layer again.
 
 # %% [markdown]
 # The End
