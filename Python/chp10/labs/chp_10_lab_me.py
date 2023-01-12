@@ -13,6 +13,9 @@
 #     name: python3
 # ---
 
+# %% [markdown]
+# # 10.9 Lab: Deep Learning
+
 # %%
 import pandas as pd
 import numpy as np
@@ -46,7 +49,7 @@ from cvglmnet import cvglmnet
 from cvglmnetPredict import cvglmnetPredict
 
 # %% [markdown]
-# # 10.9.1 A Single Layer Network on the Hitters Data
+# ## 10.9.1 A Single Layer Network on the Hitters Data
 
 # %% [markdown]
 # The lab starts off by reading baseball player data from Hitters.csv and then randomly generating a list of numbers, called testids.  Testids are indices referring to rows in our testing dataset.  This list of numbers will separate the training data from the testing data when creating a model and assessing its performance.
@@ -216,7 +219,7 @@ np.mean(abs(y_test - npred.flatten()))
 # Because the dropout layer drops at random, I don't think it's possible to reproduce the results from the lab in R exactly, however the MAE is close enough and the plots above are quite similar to the plots in R, such that I'm confident I've reproduced the lab's results as much as possible.
 
 # %% [markdown]
-# # 10.9.2 A Multilayer Network on the MNIST Digit Data
+# ## 10.9.2 A Multilayer Network on the MNIST Digit Data
 
 # %% [markdown]
 # This lab demonstrates the ability of a neural network to recognize and classify digits 0-9 from pictures of hand written digits.  The mnist dataset, which can be found in the `keras` library contains many such images and is first loaded into a training and testing dataset
@@ -334,7 +337,7 @@ modelnn_acc
 # The neural network does well with 98% accuracy, close to the accuracy from the textbook (0.9813).  Again, because the dropout layers drop randomly, I don't think it's possible to recreate the results from the lab exactly, but these are very close.
 
 # %% [markdown]
-# ## Multiclass Logistic Regression
+# ### Multiclass Logistic Regression
 
 # %% [markdown]
 # This part of the lab shows how `keras` can perform multiclass logistic regression.  The lab mentions that `glmnet` library, which was used in lab 10.9.1, can also perform multiclass logistic regression, `keras` does it more quickly.  
@@ -399,7 +402,7 @@ modellr_acc
 # The accuracy for this logistic regression model is quite close to what was found in the lab (0.9286).  It's a little lower when compared to ~98% in the neural network, but the model is far simpler and if interpretability matters, would be way easier to interpret.
 
 # %% [markdown]
-# # 10.9.3 Convolutional Neural Networks
+# ## 10.9.3 Convolutional Neural Networks
 
 # %% [markdown]
 # This next lab focuses on a special kind of neural network known as Convolutional Neural Networks (CNN).  According to the text, CNNs recognize specific patterns in an image and use these patterns to make a classification.  
@@ -494,7 +497,7 @@ np.mean(y_pred_classes == g_test.flatten())
 # The test accuracy is ~44%, close to 0.4561, which was found in the lab.
 
 # %% [markdown]
-# # 10.9.4 Using Pretrained CNN Models
+# ## 10.9.4 Using Pretrained CNN Models
 
 # %% [markdown]
 # This part of the lab focuses on using a pretrained CNN model called `resnet50`, which was trained on a data base of natural images called `imagenet`.  Because `reset50` is already trained, we can immediately use it to make predictions. 
@@ -537,7 +540,7 @@ pred6 = model.predict(x)
 keras.applications.imagenet_utils.decode_predictions(pred6, top=3)
 
 # %% [markdown]
-# # 10.9.5 IMDb Document Classification
+# ## 10.9.5 IMDb Document Classification
 
 # %% [markdown]
 # This part of the lab uses movie review data from the [Internet Movie Database](www.imdb.com), to perform sentiment analysis and classify a review as either positive or negative.  The dataset is part of the `keras` package and `num_words` specifies how many words will be in the `word_index` object, discussed soon.
@@ -756,7 +759,7 @@ plt.tight_layout();
 # Another model was generated from the same training data as the last model, however it was validated against test data.  The figure above shows training loss/accuracy and test loss/accuracy epoch by epoch.  
 
 # %% [markdown]
-# # 10.9.6 Recurrent Neural Networks
+# ## 10.9.6 Recurrent Neural Networks
 
 # %% [markdown]
 # The last lab highlights what are known as Recurrent Neural Networks (RNN) and are best used when the order or sequencing of inputs to the model carries information and is important.  The book gives several examples:
@@ -770,7 +773,7 @@ plt.tight_layout();
 # For the most part, it seems things related to human communication are prime targets for RNN.
 
 # %% [markdown]
-# ## Sentiment analysis with IMDb again
+# ### Sentiment analysis with IMDb again
 
 # %%
 max_features = 10_000
@@ -888,7 +891,7 @@ np.mean(y_test == predy.flatten())
 # The testing accuracy of the RNN is ~87%, which is very close to the 0.8721 found in the lab.
 
 # %% [markdown]
-# ## Time Series Prediction
+# ### Time Series Prediction
 
 # %% [markdown]
 # The final part of the lab uses time series data of the New York Stock Exchange (NYSE) to predict trading volume.
