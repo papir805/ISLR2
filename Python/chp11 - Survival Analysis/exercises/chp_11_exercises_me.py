@@ -441,17 +441,11 @@ ax.set_ylabel('Estimated Probability of Survival');
 # plot(kmf_fit_r, xlab='Months',
 #     ylab='Estimated Probability of Survival')
 
-# %% language="R"
-# names(kmf_fit_r)
-
-# %% language="R"
-# kmf_fit_r$std.chaz
-
 # %%
 brain_cancer_df = pd.read_csv("../datasets/BrainCancer.csv", index_col=0)
 
 # %%
-brain_cancer_df.head()
+brain_cancer_df.sort_values(by='time')
 
 # %%
 a = 0.3173105191
@@ -468,7 +462,53 @@ plt.legend(labels=[]);
 # %% [markdown]
 # #### 10b) Draw a bootstrap sample of size $n=88$ from the pairs $(y_i,\delta_i)$, and compute the resulting Kaplan-Meier survival curve.  Repeat this process $B=200$ times.  Use the results to obtain an estimate of the standard error of the Kaplan-Meier survival curve at each timepoint.  Compare this to the standard errors obtained in (a).
 
+# %% language="R"
+# sort(Surv(time, status))
+
+# %% language="R"
+# kmf_fit_r <- survfit(Surv(time, status) ~ 1, conf.type='log-log', error='greenwood')
+# kmf_fit_r
+
+# %% language="R"
+# names(kmf_fit_r)
+
+# %% language="R"
+# kmf_fit_r$std.err
+
+# %% language="R"
+# kmf_fit_r$n.risk
+
+# %% language="R"
+# kmf_fit_r$n.event
+
+# %% language="R"
+# kmf_fit_r$surv
+
+# %% language="R"
+# kmf_fit_r$upper
+
+# %% language="R"
+# kmf_fit_r$std.chaz
+
 # %%
+surv = survive.SurvivalData('time', status='status', data=brain_cancer_df)
+surv
+
+# %%
+km = survive.KaplanMeier()
+km.fit(surv, n_boot=500, var_type='greenwood')
+
+# %%
+km.
+
+# %%
+km.quantile()
+
+# %%
+from survive import datasets
+
+# %%
+datasets.leukemia()
 
 # %%
 survival_func.rename(columns={"KM_estimate":"session_1"}, inplace=True)
@@ -508,6 +548,9 @@ bstrap_df['session_1'].std()
 
 # %%
 bstrap_df.std(axis=1)
+
+# %%
+bstrap_df.mean(axis=1)
 
 # %%
 brain_cancer_df.sort_values(by='time')
