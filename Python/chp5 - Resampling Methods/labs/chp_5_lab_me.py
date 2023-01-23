@@ -810,7 +810,7 @@ for _ in range(1000):
     
 original_alpha = alpha_fn(pfolio_df, np.arange(1, n+1))
 alpha_bstrap_mean = np.mean(alphas)
-alpha_bstrap_std = np.std(alphas)
+alpha_bstrap_std = np.std(alphas, ddof=1) ## When calculating the std dev, np.std divides by N-ddof.  To find the sample std dev, we set ddof=1
 
 ## Bias = bootstrap realization of the statistic - the original statistic from the original data
 alpha_bias = alpha_bstrap_mean - original_alpha
@@ -910,9 +910,9 @@ for _ in range(1000):
 original_intercept = boot_fn(auto_df_no_gaps, np.arange(1, 393))[0]
 original_slope = boot_fn(auto_df_no_gaps, np.arange(1, 393))[1]
 intercept_bstrap_mean = np.mean(intercepts)
-intercept_bstrap_std = np.std(intercepts)
+intercept_bstrap_std = np.std(intercepts, ddof=1) ## When calculating the std dev, np.std divides by N-ddof.  To find the sample std dev, we set ddof=1
 slope_bstrap_mean = np.mean(slopes)
-slope_bstrap_std = np.std(slopes)
+slope_bstrap_std = np.std(slopes, ddof=1)
 
 ## Bias = bootstrap realization of the statistic - the original statistic from the original data
 ## bias for intercepts
@@ -988,13 +988,13 @@ original_hp_1 = boot_fn(auto_df_no_gaps, np.arange(1, 393))[1]
 original_hp_2 = boot_fn(auto_df_no_gaps, np.arange(1, 393))[2]
 
 intercept_bstrap_mean = np.mean(intercepts)
-intercept_bstrap_std = np.std(intercepts)
+intercept_bstrap_std = np.std(intercepts, ddof=1) ## When calculating the std dev, np.std divides by N-ddof.  To find the sample std dev, we set ddof=1
 
 hp_1_bstrap_mean = np.mean(hp_1s)
-hp_1_bstrap_std = np.std(hp_1s)
+hp_1_bstrap_std = np.std(hp_1s, ddof=1)
 
 hp_2_bstrap_mean = np.mean(hp_2s)
-hp_2_bstrap_std = np.std(hp_2s)
+hp_2_bstrap_std = np.std(hp_2s, ddof=1)
 
 ## Bias = bootstrap realization of the statistic - the original statistic from the original data
 ## bias for intercepts
