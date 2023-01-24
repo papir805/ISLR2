@@ -44,7 +44,7 @@ from sklearn.linear_model import LinearRegression
 # set.seed(1)
 # train <- sort(sample(392, 196))
 
-# %% language="R"
+# %% jupyter={"outputs_hidden": true, "source_hidden": true} tags=[] language="R"
 # train
 
 # %%
@@ -57,7 +57,7 @@ train <- sample(392, 196)
 train_idx = np.array(data)
 train_idx = np.sort(train_idx)
 
-# %%
+# %% jupyter={"outputs_hidden": true, "source_hidden": true} tags=[]
 train_idx
 
 # %% [markdown]
@@ -66,10 +66,10 @@ train_idx
 # %% [markdown]
 # ### Checking that indexing in R and Python return same rows
 
-# %% [markdown]
+# %% [markdown] tags=[] jupyter={"source_hidden": true}
 # #### Using .iloc
 
-# %% language="R"
+# %% jupyter={"outputs_hidden": true, "source_hidden": true} tags=[] language="R"
 # Auto[sort(train), ]
 
 # %%
@@ -81,20 +81,18 @@ auto_df = auto_df.set_index(keys=np.arange(1, len(auto_df) + 1))
 # Drow rows that contain '?' values that represent na values
 auto_df = auto_df.dropna()
 
-# %%
+# %% jupyter={"outputs_hidden": true, "source_hidden": true} tags=[]
 auto_df[-1:]
 
-# %%
-
-# %%
+# %% jupyter={"outputs_hidden": true, "source_hidden": true} tags=[]
 # .loc uses index labels to access rows from the dataframe.  Because auto_df originally had 397 rows, before dropping na values, the rows were labelled 1-397.
 auto_df.loc[397]
 
-# %%
+# %% jupyter={"outputs_hidden": true, "source_hidden": true} tags=[]
 # .iloc uses integer labels to access rows from the dataframe.  After dropping the 5 na values from auto_df, there are only 392 rows remaining.  These rows have integer labels ranging from 0 (first row) to 391 (last row).  Indexing in R behaves like .iloc in that it uses integer labels.  This is why sample(392, 196) was used in generating the training index labels in R, there are 392 rows in the dataframe to sample from.
 auto_df.iloc[392 - 1]
 
-# %%
+# %% jupyter={"source_hidden": true} tags=[]
 # Using subtracting 1 from train_idx ensures the labels generated in R, which go from 1-392, now range from 0-391 so they work in P
 auto_df.iloc[train_idx-1]
 
@@ -877,18 +875,16 @@ boot_fn(auto_df_no_gaps, idx)
 # %% language="R"
 # myBootstrap
 
-# %% language="R"
+# %% tags=[] language="R"
 # myBootstrap$t0[1]
 
-# %%
-# Intercept Bias
-# %%R
-mean(myBootstrap$t[,1]) - myBootstrap$t0[1]
+# %% language="R"
+# # Intercept Bias
+# mean(myBootstrap$t[,1]) - myBootstrap$t0[1]
 
-# %%
-# Horsepower Bias
-# %%R
-mean(myBootstrap$t[,2]) - myBootstrap$t0[2]
+# %% language="R"
+# # Horsepower Bias
+# mean(myBootstrap$t[,2]) - myBootstrap$t0[2]
 
 # %% language="R"
 # boot(Auto, boot.fn, 1000)
