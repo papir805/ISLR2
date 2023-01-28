@@ -21,7 +21,7 @@ This repository aims to fill the void and contains Jupyter notebooks with code f
 
 <br/>
 
-## While these chapters already have others who have written their own solutions, these are my own stab at them:
+#### While these chapters already have others who have written their own solutions, these are my own stab at them:
 * **Chapter 5 - Resampling Methods**
     - [Labs](https://nbviewer.org/github/papir805/ISLR2/blob/master/Python/chp5%20-%20Resampling%20Methods/labs/chp_5_lab_me.ipynb)
     - [Applied Exercises](https://nbviewer.org/github/papir805/ISLR2/blob/master/Python/chp5%20-%20Resampling%20Methods/exercises/chp_5_exercises_me.ipynb)
