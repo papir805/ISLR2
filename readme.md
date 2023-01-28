@@ -14,7 +14,7 @@ This repository aims to fill the void and contains Jupyter notebooks with code f
 	- [Applied Exercises](https://nbviewer.org/github/papir805/ISLR2/blob/master/Python/chp10%20-%20Deep%20Learning/exercises/chp_10_exercises_me.ipynb)
 * **Chapter 11 - Survival Analysis and Censored Data**
 	- [Labs](https://nbviewer.org/github/papir805/ISLR2/blob/master/Python/chp11%20-%20Survival%20Analysis/labs/chp_11_lab_me.ipynb)
-	- [Conceptual/Applied Exercises](https://nbviewer.org/github/papir805/ISLR2/blob/master/Python/chp5%20-%20Resampling%20Methods/exercises/chp_5_exercises_me.ipynb)
+	- [Conceptual/Applied Exercises](https://nbviewer.org/github/papir805/ISLR2/blob/master/Python/chp11%20-%20Survival%20Analysis/exercises/chp_11_exercises_me.ipynb)
 * **Chapter 13 - Multiple Testing**
 	- Labs: Comins Soon
 	- Applied Exercises: Coming Soon
@@ -24,7 +24,7 @@ This repository aims to fill the void and contains Jupyter notebooks with code f
 ## While these chapters already have others who have written their own solutions, these are my own stab at them:
 * **Chapter 5 - Resampling Methods**
     - [Labs](https://nbviewer.org/github/papir805/ISLR2/blob/master/Python/chp5%20-%20Resampling%20Methods/labs/chp_5_lab_me.ipynb)
-    - [Applied Exercises](https://github.com/papir805/ISLR2/blob/master/Python/chp5%20-%20Resampling%20Methods/exercises/chp_5_exercises_me.ipynb)
+    - [Applied Exercises](https://nbviewer.org/github/papir805/ISLR2/blob/master/Python/chp5%20-%20Resampling%20Methods/exercises/chp_5_exercises_me.ipynb)
 
 <br/>
 
