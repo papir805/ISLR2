@@ -16,7 +16,7 @@ This repository aims to fill the void and contains Jupyter notebooks with code f
 	- [Labs](https://nbviewer.org/github/papir805/ISLR2/blob/master/Python/chp11%20-%20Survival%20Analysis/labs/chp_11_lab_me.ipynb)
 	- [Conceptual/Applied Exercises](https://nbviewer.org/github/papir805/ISLR2/blob/master/Python/chp11%20-%20Survival%20Analysis/exercises/chp_11_exercises_me.ipynb)
 * **Chapter 13 - Multiple Testing**
-	- Labs: Comins Soon
+	- Labs: Coming Soon
 	- Applied Exercises: Coming Soon
 
 <br/>
