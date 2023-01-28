@@ -94,9 +94,6 @@ plt.yticks(np.arange(0, 1.1, 0.2))
 plt.ylabel('Estimated Probability of Survival')
 ax.get_legend().remove();
 
-# %% [markdown]
-# #### By Gender
-
 # %%
 # Using survive
 brain_cancer_df['status'] = np.float64(brain_cancer_df['status'])
@@ -110,6 +107,9 @@ kmf_surv_fit = kmf_surv.fit(surv_data)
 kmf_surv_fit.plot(ci_style='lines')
 plt.xlabel('Months')
 plt.ylabel('Estimated Probability of Survival');
+
+# %% [markdown]
+# #### By Gender
 
 # %% language="R"
 # fit.sex <- survfit(Surv(time, status) ~ sex)
