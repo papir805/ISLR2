@@ -23,12 +23,11 @@ import numpy as np
 import pandas as pd
 
 from lifelines import KaplanMeierFitter, CoxPHFitter
+from lifelines.statistics import logrank_test
 
 import survive
 
 import rpy2.robjects as robjects
-from rpy2.robjects.conversion import localconverter
-from rpy2.robjects import pandas2ri
 
 from scipy import stats
 
@@ -717,10 +716,6 @@ cph_ll_fit.print_summary()
 # `survive` also didn't have any way to perform a log-rank test, but `lifelines` did.
 
 # %%
-# Using lifelines
-
-from lifelines.statistics import logrank_test
-
 group_1 = (ex_4_df['group'] == 'group 1')
 group_2 = (ex_4_df['group'] == 'group 2')
 
