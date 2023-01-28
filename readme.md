@@ -10,19 +10,21 @@ There are some great GitHub repositories that have already ported code from some
 This repository aims to fill the void and contains Jupyter notebooks with code from the labs of these three chapters, which I've ported from R to Python.  These notebooks try to reproduce the results found in the labs as closely as possible.  Additionally, I've created Jupyter notebooks and used Python code to produce my own answers to the chapters' exercises.
 
 * **Chapter 10 - Deep Learning**
-	- [Labs](https://nbviewer.org/github/papir805/ISLR2/blob/master/Python/chp10/labs/chp_10_lab_me.ipynb)
-	- [Applied Exercises](https://nbviewer.org/github/papir805/ISLR2/blob/master/Python/chp10/exercises/chp_10_exercises_me.ipynb)
+	- [Labs](https://nbviewer.org/github/papir805/ISLR2/blob/master/Python/chp10%20-%20Deep%20Learning/labs/chp_10_lab_me.ipynb)
+	- [Applied Exercises](https://nbviewer.org/github/papir805/ISLR2/blob/master/Python/chp10%20-%20Deep%20Learning/exercises/chp_10_exercises_me.ipynb)
 * **Chapter 11 - Survival Analysis and Censored Data**
-	- Labs: Coming Soon
-	- Applied Exercises: Coming Soon
+	- [Labs](https://nbviewer.org/github/papir805/ISLR2/blob/master/Python/chp11%20-%20Survival%20Analysis/labs/chp_11_lab_me.ipynb)
+	- [Conceptual/Applied Exercises](https://github.com/papir805/ISLR2/blob/master/Python/chp11%20-%20Survival%20Analysis/exercises/chp_11_exercises_me.ipynb)
 * **Chapter 13 - Multiple Testing**
 	- Labs: Comins Soon
 	- Applied Exercises: Coming Soon
 
 <br/>
 
-## For the future:
-As I work through other chapters in the book, I may also add any code that I create for those labs or exercises here too.
+## While these chapters already have others who have written their own solutions, these are my own stab at them:
+* **Chapter 5 - Resampling Methods**
+    - [Labs](https://nbviewer.org/github/papir805/ISLR2/blob/master/Python/chp5%20-%20Resampling%20Methods/labs/chp_5_lab_me.ipynb)
+    - [Applied Exercises](https://github.com/papir805/ISLR2/blob/master/Python/chp5%20-%20Resampling%20Methods/exercises/chp_5_exercises_me.ipynb)
 
 <br/>
 
