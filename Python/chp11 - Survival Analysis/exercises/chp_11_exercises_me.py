@@ -494,27 +494,8 @@ ax.set_ylim([0,1.03]);
 
 # %% [markdown]
 # #### 10a) Plot the Kaplan-Meier survival curve with $\pm1$ standard error bands, using the `survfit()` function in the `survival` package.
-
-# %% language="R"
-# library(ISLR2)
-# library(survival)
-# attach(BrainCancer)
 #
-# # Find z-score associated with +/- 1 standard error (z = -1)
-# left_tail_alpha <- pnorm(-1)
-# two_tail_alpha <- 2 * left_tail_alpha
-#
-# # Using ~ 1 is the notation to fit a single curve, as opposed to several curves based on strata
-# kmf_fit_r <- survfit(Surv(time, status) ~ 1, conf.int = 1 - two_tail_alpha)
-#
-# plot(kmf_fit_r, xlab='Months',
-#     ylab='Estimated Probability of Survival')
-
-# %% language="R"
-# names(kmf_fit_r)
-
-# %% language="R"
-# kmf_fit_r$std.err
+# In Python, both the `lifelines` and `survive` modules can produce Kaplan-Meier curves.  `survive` is a great choice if you want to closely mimic R's `survival` package, however it can't fit CoxPH models and it doesn't provide an easy way to access standard errors of the coefficients.  For some of the exercises, I'll use both Python libraries, but for other exercises, I'll only be able to use the `lifelines` library, due to `survival`'s limitations.
 
 # %%
 brain_cancer_df = pd.read_csv("../datasets/BrainCancer.csv", index_col=0)
@@ -558,22 +539,22 @@ plt.ylabel('Estimated Probability of Survival');
 km_surv.summary
 
 # %% [markdown]
-# #### 10b) Draw a bootstrap sample of size $n=88$ from the pairs $(y_i,\delta_i)$, and compute the resulting Kaplan-Meier survival curve.  Repeat this process $B=200$ times.  Use the results to obtain an estimate of the standard error of the Kaplan-Meier survival curve at each timepoint.  Compare this to the standard errors obtained in (a).
+# Both libraries behave fairly similarly when it comes to plotting the curve.  `survive` is perhaps a little nicer as it automatically plots small markers indicating when an observation became censored. `survive` also produces a nice summary output, making it very similar to R.
 
-# %% language="R"
-# kmf_fit_r <- survfit(Surv(time, status) ~ 1, conf.int=1 - two_tail_alpha)
+# %% [markdown]
+# #### 10b) Draw a bootstrap sample of size $n=88$ from the pairs $(y_i,\delta_i)$, and compute the resulting Kaplan-Meier survival curve.  Repeat this process $B=200$ times.  Use the results to obtain an estimate of the standard error of the Kaplan-Meier survival curve at each timepoint.  Compare this to the standard errors obtained in (a).
 
 # %% [markdown]
 # ##### Using survive
-# The survive library makes it very convenient to estimate the standard error using the bootstrap because one can specify `var_type='bootstrap'` and `n_boot=` when creating the model, which will perform the bootstrap process for us.  The one downside is that it doesn't show the standard error for each timepoint, like the question asks, it only shows the standard error for times in our dataset with status = 1.
+# The survive library makes it very convenient to estimate the standard error using the bootstrap because one can specify `var_type='bootstrap'` and `n_boot=` when creating the model, which will perform the bootstrap process for us.  The one downside is that it doesn't show the standard error for each timepoint, like the question asks, it only shows the standard error for uncensored times in our dataset (status = 1).
 
 # %%
+# Setting a dummy column "group", which will enable us to group by this field when creating the model.  This enables one to access the km.summary.table object, which is a DataFrame where I can return the unncesored times and the standard error of the coefficient at those times.  I wasn't able to figure out a way to access the km.summary.table object unless a group label was specified, which is why I had to create a dummy one in the first place.
 brain_cancer_df['group']='a'
 
 # %%
 surv = survive.SurvivalData('time', status='status', group='group',data=brain_cancer_df)
 
-# %%
 km = survive.KaplanMeier(conf_level=1 - two_tail_alpha, conf_type='log', n_boot=200, var_type='bootstrap', random_state=1)
 km.fit(surv)
 
@@ -585,7 +566,7 @@ km.summary.table('a')[['time', 'std. error']]
 
 # %% [markdown]
 # ##### Using lifelines
-# Unfortunately, lifelines doesn't have any built in way to estimate the standard error using the bootstrap.  Furthermore, it doesn't provide any easy to access output of what the standard error is when fitting the model, unlike survive.  Because of this deficiency, although we perform the bootstrap process and estimate the standard errors that way, we won't have anything from the lifelines library used in part a) to compare it to.
+# Unfortunately, lifelines doesn't have any built in way to estimate the standard error using the bootstrap.  Furthermore, it doesn't provide any easily accesible output of what the standard error is when fitting the model, unlike survive.  Because of this deficiency, although we perform the bootstrap process and estimate the standard errors that way, we won't have anything from the lifelines library used in part a) to compare it to.
 
 # %%
 B = 200
@@ -625,38 +606,11 @@ errors_df = pd.DataFrame({'time':bstrap_df.index.values,
 errors_df
 
 # %% [markdown]
-# These 
-
-# %%
-# mask = bstrap_df.index.isin(times)
-
-# masked_df = bstrap_df[mask]
-# masked_df.head()
-
-# standard_errors = []
-# for i in range(len(masked_df)):
-#     variance = ((masked_df.iloc[i] - masked_df.iloc[i].mean())**2).mean()
-#     standard_error = np.sqrt(variance)
-#     standard_errors.append(standard_error)
-
-# standard_err_df = pd.DataFrame(data = standard_errors, index = times, columns=['std_err'])
-# standard_err_df.head()
-
-# %%
-kmf.survival_function_
-
-# %% [markdown]
 # #### 10c) Fit a Cox proportional hazards model that uses all of the predictors to predict survival.  Summarize the main findings.
+#
+# The `survive` library has no functionality for CoxPH models, however `lifelines` does and will be used to answer any questions relating to a CoxPH model.
 
 # %%
-brain_cancer_df.head()
-
-# %%
-brain_cancer_df.dropna()
-
-# %%
-# Using lifelines
-
 cph_ll = CoxPHFitter()
 cph_ll_fit = cph_ll.fit(brain_cancer_df.dropna(), 'time', 'status', formula='sex + diagnosis + loc + ki + gtv + stereo')
 
@@ -667,9 +621,9 @@ cph_ll_fit.print_summary()
 #
 # When looking at qualitative factors, the coefficient is how many times lower or greater the estimated hazard will be between a given level and the baseline level.  For instance, patients with a Diagnosis of T.Menigioma have an estimated hazard rate of $e^{-2.15}=0.12$ times lower than those of the baseline Diagnosis level HG Glioma.  
 #
-# For quantitative factors, the coefficient is how many times lower or greater the estimated hazard becomes when that factor is increased by one unit.  For instance, an increase of 1 unit of gtv produces an estimated hazard rate that is $e^{0.03}=1.03$ times higher than before.
+# For quantitative factors, the coefficient is how many times lower or greater the estimated hazard becomes when that factor is increased by one unit.  For instance, an increase of one unit of gtv produces an estimated hazard rate that is $e^{0.03}=1.03$ times higher than before.
 #
-# The summary indicates that Supratentorial, Male, and SRT produce the largest increases in the hazard rate, however none have p-values indicating these variables are statistically significant.  Of the variables that are statistically significant at $\alpha=0.05$, Diagnosis LG glioma, Diagnosis Meningioma, Diagnosis Other, ki, all of their coefficients indicate they'll reduce the hazard rate, with Diagnosis meningioma producing the largest reduction.
+# The summary indicates that Supratentorial, Male, and SRT produce the largest increases in the hazard rate, however none have p-values that are statistically significant.  Of the variables that are statistically significant at $\alpha=0.05$, Diagnosis LG glioma, Diagnosis Meningioma, Diagnosis Other, and ki, all of their coefficients indicate they'll reduce the hazard rate, with Diagnosis meningioma producing the largest reduction.
 
 # %% [markdown]
 # #### 10d) Stratify the data by the value of `ki`.  (Since only one observation has `ki=40`, you can group that observation together with the observations that have `ki=60`.) Plot the Kaplan-Meier survival curves for each of the five strata, adjusted for the other predictors.
@@ -695,10 +649,6 @@ def ki_grouper(x):
 # %%
 brain_cancer_df['group'] = brain_cancer_df['ki'].apply(ki_grouper)
 
-# %%
-brain_cancer_df[brain_cancer_df['group'] == 'A']
-
-# %%
 surv_by_ki = survive.SurvivalData(time='time',
                                   status='status', 
                                   group='group',
@@ -747,24 +697,24 @@ fig, ax = plt.subplots(1,1, figsize=(12,8))
 km.plot(ci=False, ax=ax);
 
 # %% [markdown]
-# Visually, there isn't any indication that one group has better survival rates than the other and overall, any difference are minor.  We see that in the short run, group 2 has higher survival rates by about 40% until roughly 38 units of time, then group 1 has higher surival rates by about 15-20% until 55 units of time, and lastly group 2 has about 20% higher survival rates until the study is over.
+# Visually, there isn't any indication that one group has better survival rates than the other and overall, any differences are minor.  We see that in the short run, group 2 has survival rates about 40% higher, until roughly 38 units of time.  At that point, group 1 has higher surival rates by about 15-20% until 55 units of time, when group 2 takes the lead again with about a 20% higher survival rate until the study is over.
 
 # %% [markdown]
 # #### 11b) Fit Cox's proportional hazards model, using the group indicator as a covariate.  What is the estimated coefficient?  Write a sentence providing the interpretation of this coefficient, in terms of the hazard or the instantaneous probability of the event.  Is there evidence that the true coefficient value is non-zero?
 
 # %%
-# Using lifelines
-
 cph_ll = CoxPHFitter()
 cph_ll_fit = cph_ll.fit(ex_4_df, 'obs_y', 'cens_indicator', formula='group')
 
 cph_ll_fit.print_summary()
 
 # %% [markdown]
-# The estimated coefficient is -0.34 for group 2, which means that the risk for those in group 2 is $\approx 0.71 \text{ times (i.e. } e^{-0.34})$ the risk for those in the baseline group (group 1).  Because the p-value is so high $(p=0.78)$, there isn't sufficient evidence to conclude that the true coefficient value is non-zero, indicating that there isn't a difference in risk between the two groups.
+# The estimated coefficient is -0.34 for group 2, which means that the risk for those in group 2 is $\approx 0.71 \text{ times (i.e. } e^{-0.34})$ the risk for those in the baseline group (group 1).  Because the p-value is so high $(p=0.78)$, there isn't sufficient evidence to conclude that the true coefficient value is non-zero, indicating no difference in risk between the two groups.
 
 # %% [markdown]
 # #### 11c) Recall from Section 11.5.2 that in the case of a single binary covariate, the log-rank test statistic should be identical to the score statistic from the Cox model.  Conduct a log-rank test to determine whether there is a difference between the survival curves for the two groups.  How does the *p*-value for the log-rank test statistic compare to the *p*-value for the score statistic for the Cox model from (b)?
+#
+# `survive` also didn't have any way to perform a log-rank test, but `lifelines` did.
 
 # %%
 # Using lifelines
