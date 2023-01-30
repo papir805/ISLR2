@@ -82,11 +82,11 @@ brain_cancer_df['status'].value_counts().to_frame().T
 
 # %% [markdown]
 # #### Different Python Libraries
-# In Python, there are several libraries that can replicate parts of what R does in this lab, however I was unable to find any single library that did *all* of the things that R did.  The closest to an exact match was the `lifelines` library, as it could fit both KaplanMeier and CoxPH models, however there were a few areas that it fell short.
+# In Python, there are several libraries that can replicate parts of what R does in this lab, however I was unable to find any single library that did *all* of the things that R did.  The closest to an exact match was the `lifelines` library, as it could fit both KaplanMeier and CoxPH models, however there were a few areas that it fell short and some of the other libraries were better.
 #
-# Another Python library, `survive`, could only fit KaplanMeier models, but the use of this library felt very similar to that of R.  For instance, there is a `survive.SurvivalData()` object that one can create based on time and status information from your dataset, which behaves in exactly the same way as the `Surv()` function in R.  After creating the object containing the survival data in R or Python, you then fit the model to that data.
+# Another Python library, `survive`, could only fit KaplanMeier models, but the use of this library felt very similar to that of R.  For instance, there is a `survive.SurvivalData()` object that one can create survival data, based on time and status information from your dataset, which is essentially the same survival data the `Surv()` function in R generates.  Furthermore, when fitting the model in `survive`, one can group by values of a predictor using the `group=` parameter, which will generate survival curves for each level of that group, much like one can do using the R style formula in the `survfit()` function.
 #
-# Lastly, there's a Python library I didn't explore as much as the other two called `scikit-survival`.  This library was able to mimic the behavior of R's `survdiff()` function where `lifelines` and `survive` could not.
+# Lastly, there's a Python library I didn't explore as much as the other two called `scikit-survival`.  This library was able to mimic the behavior of R's `survdiff()` function for CoxPH models where `lifelines` and `survive` could not.
 
 # %% [markdown]
 # ##### Using Lifelines
@@ -104,7 +104,7 @@ plt.ylabel('Estimated Probability of Survival')
 ax.get_legend().remove();
 
 # %% [markdown]
-# By default, `lifelines` represents the uncertainty of the estimate using shading on the graph to represent the confidence interval for each timepoint, which is different than in R.  By tinkering with `matplotlib` some, this can be overcome, but would be overkill and unncessary.
+# By default, `lifelines` represents the uncertainty of the estimate using shading on the graph to represent the confidence interval for each timepoint, which is different behavior than in R.  By tinkering with `matplotlib` some, this can be overcome, but would be overkill and unncessary.
 
 # %% [markdown]
 # ##### Using Survive
@@ -156,7 +156,7 @@ plt.yticks(np.arange(0, 1.1, 0.2))
 plt.ylabel('Estimated Probability of Survival');
 
 # %% [markdown]
-# With `lifelines` it's also possible to plot the survival curve for different levels of a predictor, such as gender in this case, and without any shading representing the confidence intervals.  Unfortunately, `lifelines` won't automatically generate a plot for each level of the predictor.  Instead, we have to partition the dataset by level, fit the model once for each partition of the data, and then plot the survival curve on a shared axis.
+# With `lifelines` it's also possible to plot the survival curve for different levels of a predictor, such as gender in the case of the graph above, and without any confidence intervals.  Unfortunately, `lifelines` won't automatically generate a plot for each level of the predictor though.  Instead, we have to partition the dataset by level, fit the model once for each partition of the data, and then plot the survival curve on a shared axis.
 
 # %% [markdown]
 # ##### Using Survive
@@ -179,7 +179,7 @@ plt.yticks(np.arange(0, 1.1, 0.2))
 plt.ylabel('Estimated Probability of Survival');
 
 # %% [markdown]
-# `survive` is a little easier to use when plotting a survival curve based on different levels of a predictor, as one can specify the `group=` parameter and it will automatically fit a different survival curve and plot it for each level of the predictor.
+# `survive` is a little easier to use when plotting a survival curve based on different levels of a predictor, as one can specify the `group=` parameter when creating the `survive.SurvivalData()` object and it will automatically fit a different survival curve for each level of the predictor.  Afterwards, it's easy to plot all the curves at once by using a single call of `kmf_surv.plot()`.
 
 # %% [markdown]
 # ### Log-Rank Test
@@ -204,11 +204,11 @@ results = logrank_test(brain_cancer_df['time'][male],
 results.print_summary()
 
 # %% [markdown]
-# `lifelines` was able to perform a Log-Rank test, however the output wasn't as verbose as the ouput found in R.  Both R and Python had the same chi-square test_statistic, degrees of freedom, p-value, and -log2(p), but R also showed the group sizes, as well as observed and expected counts.
+# `lifelines` was able to perform a Log-Rank test, however the output wasn't as verbose as the ouput found in R.  Both R and Python had the same chi-square test_statistic, degrees of freedom, p-value, and -log2(p), but R also showed the group sizes (N), as well as observed and expected counts.
 
 # %% [markdown]
 # #### Using survive
-# As far as I was able to tell, the `survive` library didn't have any way to perform a Log-Rank test.
+# I was unable to find any documentation for a Log-Rank test on the `survive` website.  I don't think the library can perform this kind of test.
 
 # %% [markdown]
 # #### Using scikit-survival
@@ -237,7 +237,7 @@ surv_counts
 
 # %% [markdown]
 # #### Different Python Libraries
-# I didn't play around with `scikit-survival` for CoxPH models, however the [documentation](https://scikit-survival.readthedocs.io/en/stable/api/generated/sksurv.linear_model.CoxPHSurvivalAnalysis.html) indicates it should be possible.  
+# I didn't play around with `scikit-survival` for CoxPH models, however the [documentation](https://scikit-survival.readthedocs.io/en/stable/api/generated/sksurv.linear_model.CoxPHSurvivalAnalysis.html) indicates it should be possible.  At some point in the future I may investigate this libraries capabilites further.
 #
 # The `survive` library wasn't able to fix CoxPH models, however `lifelines` could, and will be used predominantly for the remainder of the lab.
 
@@ -251,7 +251,7 @@ cph_ll_fit = cph_ll.fit(brain_cancer_df, 'time', 'status', formula='sex')
 cph_ll_fit.print_summary()
 
 # %% [markdown]
-# `lifelines` matches R's output, for the most part.  There are some minor differences like R showing output for the Wald Test, or the score of the logrank test, while `lifelines` shows a confidence interval for both the coef and the exp(coef).  Overall, both are very similar.
+# `lifelines` matches R's output, for the most part.  There are some minor differences like R showing output for the Wald Test, or the score of the logrank test, while `lifelines` shows a confidence interval for both the coef and the exp(coef).  Overall, both are very similar though.
 
 # %% language="R"
 # summary(fit.cox)$logtest[1]
@@ -266,7 +266,9 @@ cph_ll_fit.print_summary()
 # logrank.test$chisq
 
 # %% [markdown]
-# In `lifelines`, the `print_summary()` function returns None and indexing into the output to get individual values isn't possible like it is in R.  The reasoning behind why the lab in R extracts the values individually that are shown above is to show more decimals.  If we want to see more decimals in `lifelines`, we can set the `decimals=` parameter.  
+# In `lifelines`, the `print_summary()` function shows several of the values shown above in R, however it shows them along with many others.  Unfortunately, if one wanted to access a single value, it isn't possible.  The `print_summary()` function returns a None type object when it's called and indexing into the output isn't possible like it is in R.  
+#
+# Regardless, the reasoning behind why the lab in R extracts the values individually was to show more decimals, which is possible using `lifelines`.  If we want to see more decimals, we can set the `decimals=` parameter.  
 
 # %%
 cph_ll_fit.print_summary(decimals=6)
@@ -298,7 +300,9 @@ cph_all_ll_fit.print_summary()
 # modaldata
 
 # %% [markdown]
-# While it's possible to recreate the R code for the `modaldata` `data.frame` in Python, with the `lifelines` library, it isn't necessary, as will soon be seen.  To use `lifelines`, all that's really needed is the first line of code that stores the unique diagnosis levels into a variable called `levels.`.  I've included the code below to also recreate the `modaldata` anyways, but left it commented out.
+# While it's possible to recreate the R code for the `modaldata` `data.frame` in Python, with the `lifelines` library, it isn't necessary, as will soon be seen.  
+#
+# To use `lifelines`, all that's really needed is the first line of code that stores the unique diagnosis levels into a variable called `levels.`.  I've included the code below which would recreate the `modaldata`, but left it commented out.
 
 # %%
 levels = brain_cancer_df[brain_cancer_df['diagnosis'].isnull()==False]['diagnosis'].unique()[[0,2,1,3]]
@@ -342,7 +346,7 @@ plt.xlabel('Months')
 plt.ylabel('Survival Probability');
 
 # %% [markdown]
-# `lifelines` is able to plot a survival curve based on diagnosis level automatically, as long as the the `covariates=` and `values=` parameters are specified.
+# `lifelines` is able to plot a survival curve based on diagnosis level automatically, as long as the `covariates=` and `values=` parameters are specified.
 
 # %% [markdown]
 # ## 11.8.2 Publication Data
@@ -540,7 +544,7 @@ queuing_df['failed'].mean()
 
 # %% [markdown]
 # #### Using Lifelines
-# In `lifelines`, if we want to segment by different levels of a predictor, we have to fit a KaplanMeier curve separately for each level.
+# In `lifelines`, if we want to segment by different levels of a predictor in a KaplanMeier model, we have to fit a KaplanMeier curve separately for each level.  This gets a little tedious and is a downside compared to `survive`
 
 # %%
 center_b_idx = (queuing_df['CenterB'] == 1)
