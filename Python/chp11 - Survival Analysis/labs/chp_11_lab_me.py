@@ -31,7 +31,6 @@ from lifelines.statistics import logrank_test
 import survive
 
 from sksurv.compare import compare_survival
-import sksurv
 
 # %load_ext rpy2.ipython
 
