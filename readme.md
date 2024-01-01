@@ -1,9 +1,9 @@
 # Porting code from ISLR 2nd Edition
 
 ## Background:
-The book [Introduction to Statistical Learning](https://www.statlearning.com) contains a wealth of information on machine learning algorithms, with labs and examples done in R, using public datasets.  Each chapter contains exercises which are meant to be performed in R as well.  Many, if not all, of the labs or exercises can be done in Python though.  
+The book [Introduction to Statistical Learning](https://www.statlearning.com) contains a wealth of information on machine learning algorithms, with labs and examples done in R using public datasets.  Each chapter contains exercises that are meant to be performed in R as well.  Many, if not all, of the labs or exercises can be done in Python, though.  
 
-There are some great GitHub repositories that have already ported code from some of the labs to Python and some of these repositories contain answers to the applied exercises in Python too, however not everything has been ported over yet.  In particular, the second edition of ISLR was recently released (August 2021), which contain several new chapters not present in the first edition.  
+There are some great GitHub repositories that have already ported code from some of the labs to Python, and some of these repositories contain answers to the applied exercises in Python too; however, not everything has been ported over yet.  In particular, the second edition of ISLR was recently released (August 2021), which contains several new chapters not present in the first edition.  
 <br/>
 
 ## Goal:
